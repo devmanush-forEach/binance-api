@@ -8,7 +8,7 @@ export type UserDocument = User & Document;
   versionKey: false,
 })
 export class User {
-  @Prop({ unique: true })
+  @Prop({ required: true, unique: true })
   email: string;
 
   @Prop({ required: true, unique: true })

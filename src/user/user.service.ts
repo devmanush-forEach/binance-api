@@ -7,26 +7,23 @@ import { User, UserDocument } from './user.schema';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async createUser(user: User): Promise<User> {
+    console.log(user);
     const { password } = user;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new this.userModel({ ...user, password: hashedPassword });
+    const userBody = { ...user, password: hashedPassword };
+    console.log(userBody);
+    const newUser = new this.userModel(userBody);
     return newUser.save();
   }
 
   async findUserByPhone(phone: string): Promise<User | undefined> {
-    return this.userModel
-      .findOne({ phone })
-      .lean()
-      .exec();
+    return this.userModel.findOne({ phone }).lean().exec();
   }
   async findUserByEmail(email: string): Promise<User | undefined> {
-    return this.userModel
-      .findOne({ email })
-      .lean()
-      .exec();
+    return this.userModel.findOne({ email }).lean().exec();
   }
 
   async updateUser(userId: string, updateData: Partial<User>): Promise<User> {
