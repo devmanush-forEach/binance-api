@@ -15,7 +15,10 @@ export class Buyer {
   coinValue: number;
 
   @Prop({ required: true })
-  priceLimit: number;
+  minPrice: number;
+
+  @Prop({ required: true })
+  maxPrice: number;
 
   @Prop({ required: true })
   title: string;

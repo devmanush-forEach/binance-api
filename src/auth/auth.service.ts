@@ -11,16 +11,24 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async validateUser(phone: string, password: string): Promise<any> {
     const user = await this.userService.findUserByPhone(phone);
     if (user && (await bcrypt.compare(password, user.password))) {
-      // const { password, ...result } = user.toObject();
       const { password, ...result } = user;
-      return result;
+      return { ...result };
     }
     return null;
+  }
+
+  async validateUserByToken(token: string): Promise<any> {
+    try {
+      const decoded = this.jwtService.verify<any>(token);
+      return { userId: decoded.sub, email: decoded.email, role: decoded.role };
+    } catch (error) {
+      throw new Error('Invalid token');
+    }
   }
 
   async login(user: any, res: Response) {
@@ -37,9 +45,11 @@ export class AuthService {
       }),
     );
 
+    const { role, updatedAt, createdAt, ...result } = user
+
     return {
       message: 'Login successful',
-      user: { email: user.email, role: user.role },
+      user: result
     };
   }
 }
