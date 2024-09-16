@@ -8,15 +8,16 @@ export class UPIDetailsService {
   constructor(
     @InjectModel(UPIDetails.name)
     private upiDetailsModel: Model<UPIDetailsDocument>,
-  ) {}
+  ) { }
 
   async create(createUPIDetailsDto: any): Promise<UPIDetails> {
+    console.log(createUPIDetailsDto);
     const createdUPIDetails = new this.upiDetailsModel(createUPIDetailsDto);
     return createdUPIDetails.save();
   }
 
   async findAll(): Promise<UPIDetails[]> {
-    return this.upiDetailsModel.find().populate('user').exec(); // Populate user details
+    return this.upiDetailsModel.find().populate('user').exec();
   }
 
   async findOne(id: string): Promise<UPIDetails> {

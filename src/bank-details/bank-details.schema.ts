@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { TransactionMethods } from 'src/transactions-methods/transaction-methods.schema';
+import { User } from 'src/user/user.schema';
 
 export type BankDetailsDocument = BankDetails & Document;
 
@@ -22,6 +24,12 @@ export class BankDetails {
 
   @Prop({ default: '' })
   remark: string;
+
+  @Prop({ type: Types.ObjectId, ref: TransactionMethods.name, required: true })
+  transactionMethodId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: User.name, required: true })
+  userId: Types.ObjectId;
 }
 
 export const BankDetailsSchema = SchemaFactory.createForClass(BankDetails);

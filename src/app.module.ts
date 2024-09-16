@@ -10,6 +10,8 @@ import { UPIDetailsModule } from './upi-details/upi-details.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { BankDetailsModule } from './bank-details/bank-details.module';
 import { ConfigModule } from '@nestjs/config';
+import { UpiModule } from './upi/upi.module';
+import { TransactionMethodsModule } from './transactions-methods/transaction-methods.module';
 
 
 @Module({
@@ -28,6 +30,8 @@ import { ConfigModule } from '@nestjs/config';
     UPIDetailsModule,
     TransactionModule,
     BankDetailsModule,
+    UpiModule,
+    TransactionMethodsModule
     // OTPModule
   ],
   controllers: [AppController],

@@ -11,30 +11,30 @@ export type TransactionDocument = Transaction & Document;
   versionKey: false,
 })
 export class Transaction {
-  @Prop({ required: true, unique: true }) // Unique constraint for transactionId
-  transactionId: string; // Unique identifier for the transaction
+  @Prop({ required: true, unique: true })
+  transactionId: string;
 
   @Prop({ required: true })
-  amount: number; // Amount of the transaction
+  amount: number;
 
   @Prop({ required: true, enum: ['credit', 'debit'] })
-  transactionType: string; // Type of transaction: 'credit' or 'debit'
+  transactionType: string;
 
   @Prop({ required: true })
-  description: string; // Description of the transaction
+  description: string;
 
-  @Prop({ type: Types.ObjectId, ref: User.name, required: true }) // Reference to the User schema
+  @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   user: Types.ObjectId;
 
   @Prop({ required: true })
-  date: Date; // Date of the transaction
+  date: Date;
 
   @Prop({
     required: true,
     enum: ['pending', 'completed', 'failed'],
     default: 'pending',
   })
-  status: string; // Status of the transaction: 'pending', 'completed', or 'failed'
+  status: string;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);
