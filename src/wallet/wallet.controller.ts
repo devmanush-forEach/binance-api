@@ -1,28 +1,40 @@
-import { Body, Controller, Param, Post, Get } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { WalletService } from './wallet.service';
-import { Wallet } from './wallet.schema';
+import { Types } from 'mongoose';
+import { WalletValue } from './crypto/crypto.schema';
 
 @Controller('wallet')
 export class WalletController {
-  constructor(private readonly walletService: WalletService) {}
+  constructor(private readonly walletService: WalletService) { }
 
-  @Get(':userId')
-  async getWallet(@Param('userId') userId: string): Promise<Wallet> {
-    return this.walletService.findWalletByUserId(userId);
+  @Post('create/:userId')
+  async createWallet(@Param('userId') userId: string) {
+    const id = new Types.ObjectId(userId);
+    return this.walletService.createWallet(id);
   }
 
-  @Post(':userId/add-crypto')
+  @Get(':userId')
+  async getWallet(@Param('userId') userId: string) {
+    const id = new Types.ObjectId(userId);
+    return this.walletService.getWalletByUserId(id);
+  }
+
+  @Post('add/:userId')
   async addCrypto(
     @Param('userId') userId: string,
-    @Body('coinId') coinId: string,
-    @Body('value') value: number,
-    @Body('address') address: string,
-  ): Promise<Wallet> {
-    return this.walletService.addCryptocurrencyToWallet(
-      userId,
-      coinId,
-      value,
-      address,
-    );
+    @Body() crypto: WalletValue,
+  ) {
+    const id = new Types.ObjectId(userId);
+    return this.walletService.addCryptoToWallet(id, crypto);
+  }
+
+  @Post('remove/:userId/:coinId')
+  async removeCrypto(
+    @Param('userId') userId: string,
+    @Param('coinId') coinId: string,
+  ) {
+    const userIdObj = new Types.ObjectId(userId);
+    const coinIdObj = new Types.ObjectId(coinId);
+    return this.walletService.removeCryptoFromWallet(userIdObj, coinIdObj);
   }
 }

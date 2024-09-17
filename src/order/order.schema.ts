@@ -2,7 +2,7 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Buyer } from 'src/user/buyer/buyer.schema';
+import { Advertisement } from 'src/advertisement/advertisement.schema';
 import { User } from 'src/user/user.schema';
 
 export type OrderDocument = Order & Document;
@@ -28,8 +28,8 @@ export class Order {
   })
   status: string;
 
-  @Prop({ type: Types.ObjectId, ref: Buyer.name, required: true })
-  buyer: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: Advertisement.name, required: true })
+  ad: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   user: Types.ObjectId;

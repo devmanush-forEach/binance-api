@@ -5,12 +5,17 @@ import { Coin, CoinDocument } from './coin.schema';
 
 @Injectable()
 export class CoinService {
-  constructor(@InjectModel(Coin.name) private coinModel: Model<CoinDocument>) {}
+  constructor(@InjectModel(Coin.name) private coinModel: Model<CoinDocument>) { }
 
   async create(createCoinDto: any): Promise<Coin> {
     const createdCoin = new this.coinModel(createCoinDto);
     return createdCoin.save();
   }
+
+  async createMany(createCoinsDto: any[]): Promise<Coin[]> {
+    return this.coinModel.insertMany(createCoinsDto, { lean: true });
+  }
+
 
   async findAll(): Promise<Coin[]> {
     return this.coinModel.find().exec();

@@ -28,6 +28,9 @@ export class Coin {
 
   @Prop({ required: true })
   totalSupply: number;
+
+  @Prop({ required: true })
+  iconUrl: string;
 }
 
 export const CoinSchema = SchemaFactory.createForClass(Coin);

@@ -11,11 +11,15 @@ import { CoinService } from './coin.service';
 
 @Controller('coins')
 export class CoinController {
-  constructor(private readonly coinService: CoinService) {}
+  constructor(private readonly coinService: CoinService) { }
 
   @Post()
   async create(@Body() createCoinDto: any) {
     return this.coinService.create(createCoinDto);
+  }
+  @Post('/many')
+  async createMany(@Body() createCoinsDto: any[]) {
+    return this.coinService.createMany(createCoinsDto);
   }
 
   @Get()
