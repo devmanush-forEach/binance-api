@@ -16,6 +16,10 @@ export class CreateAdvertisementDto {
   @IsNotEmpty()
   priceType: string;
 
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
+
   @IsNumber()
   transactionPrice: number;
 
@@ -46,4 +50,4 @@ export class CreateAdvertisementDto {
 
 export class UpdateAdvertisementDto extends PartialType(
   CreateAdvertisementDto,
-) {}
+) { }
