@@ -1,22 +1,29 @@
 // src/user/user.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from './user.schema';
+import { WalletService } from 'src/wallet/wallet.service';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private walletService: WalletService,
+  ) {}
 
   async createUser(user: User): Promise<User> {
-    console.log(user);
     const { password } = user;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userBody = { ...user, password: hashedPassword };
-    console.log(userBody);
+    const userBody: User = { ...user, password: hashedPassword };
     const newUser = new this.userModel(userBody);
-    return newUser.save();
+    const userData = await newUser.save();
+    const userId = userData._id;
+    if (userId) {
+      // await this.walletService.createWallet(userId);
+    }
+    return userData;
   }
 
   async findUserByPhone(phone: string): Promise<User | undefined> {

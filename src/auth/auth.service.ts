@@ -11,7 +11,7 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async validateUser(phone: string, password: string): Promise<any> {
     const user = await this.userService.findUserByPhone(phone);
@@ -45,11 +45,11 @@ export class AuthService {
       }),
     );
 
-    const { role, updatedAt, createdAt, ...result } = user
+    const { role, updatedAt, createdAt, ...result } = user;
 
     return {
       message: 'Login successful',
-      user: result
+      user: result,
     };
   }
 }

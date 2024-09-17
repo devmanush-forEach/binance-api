@@ -12,7 +12,8 @@ import { BankDetailsModule } from './bank-details/bank-details.module';
 import { ConfigModule } from '@nestjs/config';
 import { UpiModule } from './upi/upi.module';
 import { TransactionMethodsModule } from './transactions-methods/transaction-methods.module';
-
+import { WalletModule } from './wallet/wallet.module';
+import { AdvertisementModule } from './advertisement/advertisement.module';
 
 @Module({
   imports: [
@@ -31,10 +32,12 @@ import { TransactionMethodsModule } from './transactions-methods/transaction-met
     TransactionModule,
     BankDetailsModule,
     UpiModule,
-    TransactionMethodsModule
+    TransactionMethodsModule,
+    WalletModule,
+    AdvertisementModule,
     // OTPModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
