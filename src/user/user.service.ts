@@ -21,7 +21,7 @@ export class UserService {
     const userData = await newUser.save();
     const userId = userData._id;
     if (userId) {
-      // await this.walletService.createWallet(userId);
+      await this.walletService.createWallet(userId as Types.ObjectId);
     }
     return userData;
   }
