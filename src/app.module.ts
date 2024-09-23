@@ -14,6 +14,7 @@ import { UpiModule } from './upi/upi.module';
 import { TransactionMethodsModule } from './transactions-methods/transaction-methods.module';
 import { WalletModule } from './wallet/wallet.module';
 import { AdvertisementModule } from './advertisement/advertisement.module';
+import { CurrencyModule } from './currency/currency.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AdvertisementModule } from './advertisement/advertisement.module';
     TransactionMethodsModule,
     WalletModule,
     AdvertisementModule,
+    CurrencyModule,
     // OTPModule
   ],
   controllers: [AppController],

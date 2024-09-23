@@ -6,15 +6,9 @@ async function bootstrap() {
   const PORT = process.env.PORT || 3003;
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-  // app.enableCors({
-  //   origin: ['http://localhost:3000'],
-  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  //   allowedHeaders: 'Content-Type, Authorization',
-  //   credentials: true,
-  // });
 
   app.enableCors({
-    origin: [/^http:\/\/localhost:\d+$/], // Regex to match any localhost port
+    origin: [/^http:\/\/localhost:\d+$/],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
