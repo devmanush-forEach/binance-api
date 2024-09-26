@@ -19,6 +19,20 @@ export class BankDetailsService {
     return this.bankDetailsModel.find().exec();
   }
 
+  async findAllByUserId(
+    userId: string,
+  ): Promise<{ _id: string; upis: BankDetails[] }[]> {
+    return this.bankDetailsModel.aggregate([
+      { $match: { userId, transactionMethodId: { $ne: null } } },
+      {
+        $group: {
+          _id: '$transactionMethodId',
+          upis: { $push: '$$ROOT' },
+        },
+      },
+    ]);
+  }
+
   async findOne(id: string): Promise<BankDetails> {
     const bankDetails = await this.bankDetailsModel.findById(id).exec();
     if (!bankDetails) {

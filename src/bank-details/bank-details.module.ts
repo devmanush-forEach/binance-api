@@ -12,5 +12,6 @@ import { BankDetailsController } from './bank-details.controller';
   ],
   controllers: [BankDetailsController],
   providers: [BankDetailsService],
+  exports: [BankDetailsService],
 })
 export class BankDetailsModule {}

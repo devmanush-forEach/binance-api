@@ -6,14 +6,16 @@ import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from './user.schema';
 import { WalletService } from 'src/wallet/wallet.service';
 import { UPIDetailsService } from 'src/upi-details/upi-details.service';
+import { BankDetailsService } from 'src/bank-details/bank-details.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private walletService: WalletService,
-    private readonly upiDetailsService: UPIDetailsService
-  ) { }
+    private readonly upiDetailsService: UPIDetailsService,
+    private readonly bankDetailsService: BankDetailsService,
+  ) {}
 
   async createUser(user: User): Promise<User> {
     const { password } = user;
@@ -40,9 +42,10 @@ export class UserService {
     return this.userModel.findById(id).lean().exec();
   }
 
-  async getAllAddedPaymentMethods(id: string) {
-    const upiMethods = this.upiDetailsService.findAllByUserId(id);
-    return upiMethods;
+  async getAllAddedPaymentMethods(userId: string) {
+    const upiMethods = await this.upiDetailsService.findAllByUserId(userId);
+    const bankMethods = await this.bankDetailsService.findAllByUserId(userId);
+    return [...upiMethods, ...bankMethods];
   }
 
   async updateUser(userId: string, updateData: Partial<User>): Promise<User> {

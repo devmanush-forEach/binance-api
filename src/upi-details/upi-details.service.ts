@@ -8,7 +8,7 @@ export class UPIDetailsService {
   constructor(
     @InjectModel(UPIDetails.name)
     private upiDetailsModel: Model<UPIDetailsDocument>,
-  ) { }
+  ) {}
 
   async create(createUPIDetailsDto: any): Promise<UPIDetails> {
     console.log(createUPIDetailsDto);
@@ -19,8 +19,19 @@ export class UPIDetailsService {
   async findAll(): Promise<UPIDetails[]> {
     return this.upiDetailsModel.find().populate('user').exec();
   }
-  async findAllByUserId(userId: string): Promise<UPIDetails[]> {
-    return this.upiDetailsModel.find({ userId }).populate('user').exec();
+
+  async findAllByUserId(
+    userId: string,
+  ): Promise<{ _id: string; upis: UPIDetails[] }[]> {
+    return this.upiDetailsModel.aggregate([
+      { $match: { userId, transactionMethodId: { $ne: null } } },
+      {
+        $group: {
+          _id: '$transactionMethodId',
+          upis: { $push: '$$ROOT' },
+        },
+      },
+    ]);
   }
 
   async findOne(id: string): Promise<UPIDetails> {
