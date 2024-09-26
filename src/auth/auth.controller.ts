@@ -17,36 +17,42 @@ import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/user/user.schema';
 import { Request, Response } from 'express';
 
-
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private userService: UserService,
-  ) { }
+  ) {}
 
   @Get('jwt')
   async validateJwt(@Req() req: Request, @Res() res: Response) {
     const token = req.cookies['access_token'];
 
     if (!token) {
-      throw new HttpException('Token not found in cookies', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Token not found in cookies',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     try {
-      const { email, userId } = await this.authService.validateUserByToken(token);
+      const { email, userId } =
+        await this.authService.validateUserByToken(token);
 
-      const { password, role, createdAt, updatedAt, ...user } = await this.userService.findUserById(userId);
+      const { password, role, createdAt, updatedAt, ...user } =
+        await this.userService.findUserById(userId);
 
       return res.status(HttpStatus.OK).json({
         message: 'Token is valid',
         user,
       });
     } catch (error) {
-      throw new HttpException('Invalid or expired token', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        'Invalid or expired token',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
   }
-
 
   @Post('register')
   async register(@Body() body: User) {
@@ -59,6 +65,7 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const user = await this.authService.validateUser(body.phone, body.password);
+    console.log(user);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }

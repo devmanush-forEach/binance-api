@@ -19,8 +19,8 @@ import { JwtAuthGuard } from './gaurds/jwt-auth.gaurd';
       signOptions: { expiresIn: '24h' },
     }),
   ],
-  providers: [AuthService, JwtStrategy, JwtService],
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
-  exports: [AuthService, JwtService],
+  exports: [AuthService],
 })
 export class AuthModule {}
