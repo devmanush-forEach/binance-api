@@ -15,7 +15,7 @@ import {
 
 @Controller('advertisements')
 export class AdvertisementController {
-  constructor(private readonly advertisementService: AdvertisementService) {}
+  constructor(private readonly advertisementService: AdvertisementService) { }
 
   @Post()
   async create(@Body() createAdvertisementDto: CreateAdvertisementDto) {
@@ -27,9 +27,10 @@ export class AdvertisementController {
     return this.advertisementService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.advertisementService.findOne(id);
+
+  @Get('user/:id')
+  async findAllForUser(@Param('id') id: string) {
+    return this.advertisementService.findAllByUserId(id);
   }
 
   @Patch(':id')
@@ -43,5 +44,20 @@ export class AdvertisementController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.advertisementService.remove(id);
+  }
+
+  @Get('/buy')
+  async getAllBuyAdvertisements() {
+    return this.advertisementService.getBuyAdvertisements();
+  }
+
+  @Get('/sell')
+  async getAllSellAdvertisements() {
+    return this.advertisementService.getSellAdvertisements();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.advertisementService.findOne(id);
   }
 }

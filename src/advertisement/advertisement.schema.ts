@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Coin } from 'src/coin/coin.schema';
+import { TransactionMethods } from 'src/transactions-methods/transaction-methods.schema';
+import { User } from 'src/user/user.schema';
 
 export enum AdType {
   BUY = 'buy',
@@ -9,23 +11,26 @@ export enum AdType {
 
 @Schema({ timestamps: true })
 export class Advertisement extends Document {
+  @Prop({ type: Types.ObjectId, ref: User.name, required: true })
+  userId: Types.ObjectId;
+
   @Prop({ enum: AdType, required: true })
   adType: AdType;
 
-  @Prop({ type: String, required: true })
-  priceType: string;
+  @Prop({ type: Boolean, required: true })
+  isDynamicPrice: boolean;
 
-  @Prop({ type: Number, required: true })
+  @Prop({ type: Number, required: false })
   transactionPrice: number;
 
-  @Prop({ type: Number, required: true })
-  marketPrice: number;
+  @Prop({ type: Number, required: false })
+  pricePercent: number;
 
   @Prop({ type: Number, required: true })
-  minAmount: number;
+  transactionLimitMin: number;
 
   @Prop({ type: Number, required: true })
-  maxAmount: number;
+  transactionLimitMax: number;
 
   @Prop({ type: String, required: true })
   transactionTitle: string;
@@ -33,11 +38,12 @@ export class Advertisement extends Document {
   @Prop({ type: String })
   transactionRemark: string;
 
-  @Prop({ type: Types.ObjectId, ref: Coin.name, required: true })
-  paymentMethod: Types.ObjectId;
+  @Prop({ type: [Types.ObjectId], ref: TransactionMethods.name, required: true })
+  paymentMethods: Types.ObjectId[];
 
-  @Prop({ type: Number, required: true })
-  transactionFee: number;
+  @Prop({ type: Types.ObjectId, ref: Coin.name, required: true })
+  coinId: Types.ObjectId;
+
 }
 
 export const AdvertisementSchema = SchemaFactory.createForClass(Advertisement);

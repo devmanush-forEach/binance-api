@@ -19,6 +19,9 @@ export class UPIDetailsService {
   async findAll(): Promise<UPIDetails[]> {
     return this.upiDetailsModel.find().populate('user').exec();
   }
+  async findAllByUserId(userId: string): Promise<UPIDetails[]> {
+    return this.upiDetailsModel.find({ userId }).populate('user').exec();
+  }
 
   async findOne(id: string): Promise<UPIDetails> {
     const upiDetails = await this.upiDetailsModel

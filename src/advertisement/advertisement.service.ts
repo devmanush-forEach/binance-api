@@ -12,7 +12,7 @@ export class AdvertisementService {
   constructor(
     @InjectModel(Advertisement.name)
     private advertisementModel: Model<Advertisement>,
-  ) {}
+  ) { }
 
   async create(
     createAdvertisementDto: CreateAdvertisementDto,
@@ -24,7 +24,28 @@ export class AdvertisementService {
   }
 
   async findAll(): Promise<Advertisement[]> {
-    return this.advertisementModel.find().populate('paymentMethod').exec();
+    return this.advertisementModel.find().populate({
+      path: 'userId',
+      select: 'username email',
+    }).populate('paymentMethods').exec();
+  }
+
+  async getBuyAdvertisements(): Promise<Advertisement[]> {
+    return await this.advertisementModel.find({ adType: 'buy' }).populate({
+      path: 'userId',
+      select: 'username email',
+    }).populate('paymentMethods').exec();;
+  }
+
+  async getSellAdvertisements(): Promise<Advertisement[]> {
+    return await this.advertisementModel.find({ adType: 'sell' }).populate({
+      path: 'userId',
+      select: 'username email',
+    }).populate('paymentMethods').exec();;
+  }
+
+  async findAllByUserId(userId: string): Promise<Advertisement[]> {
+    return this.advertisementModel.find({ userId }).populate('paymentMethods').exec();
   }
 
   async findOne(id: string): Promise<Advertisement> {

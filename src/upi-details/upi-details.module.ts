@@ -12,5 +12,6 @@ import { UPIDetailsController } from './upi-details.controller';
   ],
   controllers: [UPIDetailsController],
   providers: [UPIDetailsService],
+  exports: [UPIDetailsService]
 })
-export class UPIDetailsModule {}
+export class UPIDetailsModule { }

@@ -5,13 +5,15 @@ import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from './user.schema';
 import { WalletService } from 'src/wallet/wallet.service';
+import { UPIDetailsService } from 'src/upi-details/upi-details.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private walletService: WalletService,
-  ) {}
+    private readonly upiDetailsService: UPIDetailsService
+  ) { }
 
   async createUser(user: User): Promise<User> {
     const { password } = user;
@@ -29,11 +31,18 @@ export class UserService {
   async findUserByPhone(phone: string): Promise<User | undefined> {
     return this.userModel.findOne({ phone }).lean().exec();
   }
+
   async findUserByEmail(email: string): Promise<User | undefined> {
     return this.userModel.findOne({ email }).lean().exec();
   }
+
   async findUserById(id: string): Promise<User | undefined> {
     return this.userModel.findById(id).lean().exec();
+  }
+
+  async getAllAddedPaymentMethods(id: string) {
+    const upiMethods = this.upiDetailsService.findAllByUserId(id);
+    return upiMethods;
   }
 
   async updateUser(userId: string, updateData: Partial<User>): Promise<User> {
