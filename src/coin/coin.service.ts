@@ -16,13 +16,12 @@ export class CoinService {
     return this.coinModel.insertMany(createCoinsDto, { lean: true });
   }
 
-
   async findAll(): Promise<Coin[]> {
-    return this.coinModel.find().exec();
+    return this.coinModel.find().populate('currency').exec();
   }
 
   async findOne(id: string): Promise<Coin> {
-    const coin = await this.coinModel.findById(id).exec();
+    const coin = await this.coinModel.findById(id).populate('currency').exec();
     if (!coin) {
       throw new NotFoundException(`Coin with ID ${id} not found`);
     }
@@ -32,6 +31,7 @@ export class CoinService {
   async update(id: string, updateCoinDto: any): Promise<Coin> {
     const updatedCoin = await this.coinModel
       .findByIdAndUpdate(id, updateCoinDto, { new: true })
+      .populate('currency')
       .exec();
     if (!updatedCoin) {
       throw new NotFoundException(`Coin with ID ${id} not found`);

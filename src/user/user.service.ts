@@ -7,6 +7,7 @@ import { User, UserDocument } from './user.schema';
 import { WalletService } from 'src/wallet/wallet.service';
 import { UPIDetailsService } from 'src/upi-details/upi-details.service';
 import { BankDetailsService } from 'src/bank-details/bank-details.service';
+import { TransactionMethodsService } from 'src/transactions-methods/transaction-methods.service';
 
 @Injectable()
 export class UserService {
@@ -15,7 +16,8 @@ export class UserService {
     private walletService: WalletService,
     private readonly upiDetailsService: UPIDetailsService,
     private readonly bankDetailsService: BankDetailsService,
-  ) {}
+    private readonly transactionMethodsService: TransactionMethodsService
+  ) { }
 
   async createUser(user: User): Promise<User> {
     const { password } = user;
@@ -45,7 +47,16 @@ export class UserService {
   async getAllAddedPaymentMethods(userId: string) {
     const upiMethods = await this.upiDetailsService.findAllByUserId(userId);
     const bankMethods = await this.bankDetailsService.findAllByUserId(userId);
-    return [...upiMethods, ...bankMethods];
+
+    const allMethods = { ...upiMethods, ...bankMethods }
+
+    const paymentMethods = await this.transactionMethodsService.findAll();
+    return paymentMethods?.map((pMethod: any) => {
+      return {
+        ...pMethod,
+        list: allMethods[pMethod._id] || []
+      }
+    })
   }
 
   async updateUser(userId: string, updateData: Partial<User>): Promise<User> {

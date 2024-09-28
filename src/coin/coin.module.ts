@@ -10,5 +10,6 @@ import { CoinController } from './coin.controller';
   ],
   controllers: [CoinController],
   providers: [CoinService],
+  exports: [CoinService]
 })
-export class CoinModule {}
+export class CoinModule { }

@@ -1,5 +1,5 @@
 // src/auth/auth.module.ts
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -11,7 +11,7 @@ import { JwtAuthGuard } from './gaurds/jwt-auth.gaurd';
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     PassportModule,
     WalletModule,
     JwtModule.register({
@@ -19,8 +19,8 @@ import { JwtAuthGuard } from './gaurds/jwt-auth.gaurd';
       signOptions: { expiresIn: '24h' },
     }),
   ],
-  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
-  exports: [AuthService],
+  providers: [AuthService, JwtStrategy, JwtAuthGuard],
+  exports: [AuthService, JwtStrategy, JwtModule, JwtAuthGuard],
 })
-export class AuthModule {}
+export class AuthModule { }

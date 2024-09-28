@@ -6,12 +6,17 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AdvertisementService } from './advertisement.service';
 import {
   CreateAdvertisementDto,
+  GetAdvertisementsDto,
   UpdateAdvertisementDto,
 } from './dto/advertisement.dto';
+import { Advertisement } from './advertisement.schema';
+import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
 
 @Controller('advertisements')
 export class AdvertisementController {
@@ -27,10 +32,29 @@ export class AdvertisementController {
     return this.advertisementService.findAll();
   }
 
+  @Get('search')
+  async getBuyAdvertisements(
+    @Query() query: GetAdvertisementsDto,
+  ): Promise<Advertisement[]> {
+    const { userId, adType, coinId, page, limit } = query;
 
-  @Get('user/:id')
-  async findAllForUser(@Param('id') id: string) {
-    return this.advertisementService.findAllByUserId(id);
+    return this.advertisementService.searchAdvertisements(
+      { userId, adType, coinId },
+      page,
+      limit,
+    );
+  }
+
+
+  @Get('user')
+  @UseGuards(JwtAuthGuard)
+  async findAllForUser(@Param('userId') userId: string, @Query() query: GetAdvertisementsDto,) {
+    const { adType, coinId, page, limit } = query;
+    return this.advertisementService.searchAdvertisements(
+      { userId, adType, coinId },
+      page,
+      limit,
+    );
   }
 
   @Patch(':id')

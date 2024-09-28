@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Coin } from 'src/coin/coin.schema';
+import { Currency } from 'src/currency/currency.schema';
 import { TransactionMethods } from 'src/transactions-methods/transaction-methods.schema';
 import { User } from 'src/user/user.schema';
 
@@ -31,6 +32,9 @@ export class Advertisement extends Document {
 
   @Prop({ type: Number, required: true })
   transactionLimitMax: number;
+
+  @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
+  currency: Types.ObjectId;
 
   @Prop({ type: String, required: true })
   transactionTitle: string;

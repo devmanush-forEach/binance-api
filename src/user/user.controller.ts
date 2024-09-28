@@ -6,10 +6,10 @@ import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/payment-methods')
+  @UseGuards(JwtAuthGuard)
   async getUsersPMethods(@Param('userId') userId: string): Promise<any> {
     return this.userService.getAllAddedPaymentMethods(userId);
   }

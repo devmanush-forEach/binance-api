@@ -10,5 +10,6 @@ import { TransactionMethods, TransactionMethodsSchema } from './transaction-meth
     ],
     controllers: [TransactionMethodsController],
     providers: [TransactionMethodsService],
+    exports: [TransactionMethodsService]
 })
 export class TransactionMethodsModule { }

@@ -1,17 +1,17 @@
 // src/auth/auth.service.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UserService } from '../user/user.service';
 import { Response } from 'express';
 import * as cookie from 'cookie';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async validateUser(phone: string, password: string): Promise<any> {
     const user = await this.userService.findUserByPhone(phone);

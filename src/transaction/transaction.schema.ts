@@ -2,6 +2,7 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Currency } from 'src/currency/currency.schema';
 import { User } from 'src/user/user.schema';
 
 export type TransactionDocument = Transaction & Document;
@@ -16,6 +17,9 @@ export class Transaction {
 
   @Prop({ required: true })
   amount: number;
+
+  @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
+  currency: Types.ObjectId;
 
   @Prop({ required: true, enum: ['credit', 'debit'] })
   transactionType: string;

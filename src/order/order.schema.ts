@@ -3,6 +3,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Advertisement } from 'src/advertisement/advertisement.schema';
+import { Currency } from 'src/currency/currency.schema';
+import { TransactionMethods } from 'src/transactions-methods/transaction-methods.schema';
 import { User } from 'src/user/user.schema';
 
 export type OrderDocument = Order & Document;
@@ -30,6 +32,9 @@ export class Order {
 
   @Prop({ type: Types.ObjectId, ref: Advertisement.name, required: true })
   ad: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: TransactionMethods.name, required: true })
+  transactionMethod: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   user: Types.ObjectId;

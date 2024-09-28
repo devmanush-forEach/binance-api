@@ -8,10 +8,9 @@ export class UPIDetailsService {
   constructor(
     @InjectModel(UPIDetails.name)
     private upiDetailsModel: Model<UPIDetailsDocument>,
-  ) {}
+  ) { }
 
   async create(createUPIDetailsDto: any): Promise<UPIDetails> {
-    console.log(createUPIDetailsDto);
     const createdUPIDetails = new this.upiDetailsModel(createUPIDetailsDto);
     return createdUPIDetails.save();
   }
@@ -22,8 +21,9 @@ export class UPIDetailsService {
 
   async findAllByUserId(
     userId: string,
-  ): Promise<{ _id: string; upis: UPIDetails[] }[]> {
-    return this.upiDetailsModel.aggregate([
+  ): Promise<any> {
+    const result = {};
+    const upiMethods = await this.upiDetailsModel.aggregate([
       { $match: { userId, transactionMethodId: { $ne: null } } },
       {
         $group: {
@@ -32,6 +32,12 @@ export class UPIDetailsService {
         },
       },
     ]);
+
+    upiMethods?.forEach((method) => {
+      result[method._id] = method.upis;
+    })
+
+    return result;
   }
 
   async findOne(id: string): Promise<UPIDetails> {

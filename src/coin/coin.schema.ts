@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { Currency } from 'src/currency/currency.schema';
 
 export type CoinDocument = Coin & Document;
 
@@ -19,6 +20,9 @@ export class Coin {
 
   @Prop({ required: true })
   price: number;
+
+  @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
+  currency: Types.ObjectId;
 
   @Prop({ default: 0 })
   volume: number;

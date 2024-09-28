@@ -16,7 +16,11 @@ export class WalletService {
   }
 
   async getWalletByUserId(userId: Types.ObjectId): Promise<Wallet> {
-    const wallet = await this.walletModel.findOne({ userId }).populate('userId');
+    const wallet = await this.walletModel.findOne({ userId }).select({ userId: 0 }).lean().populate({
+      path: 'walletValues.coin',
+      model: 'Coin',
+    }).exec();
+
     if (!wallet) throw new NotFoundException('Wallet not found');
     return wallet;
   }

@@ -40,6 +40,6 @@ import { CurrencyModule } from './currency/currency.module';
     // OTPModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
-export class AppModule {}
+export class AppModule { }

@@ -8,17 +8,31 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { Order } from './order.schema';
+import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
 
 @Controller('orders')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
   @Post()
   create(@Body() createOrderDto: any): Promise<Order> {
     return this.orderService.create(createOrderDto);
+  }
+
+  @Get('user')
+  @UseGuards(JwtAuthGuard)
+  findAllForUser(
+    @Param('userId') userId: string,
+    @Query('page') page?: number,
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+  ): Promise<Order[]> {
+    return this.orderService.findAllForUser(userId, { page, type, status });
   }
 
   @Get()
@@ -30,6 +44,7 @@ export class OrderController {
   findOne(@Param('id') id: string): Promise<Order> {
     return this.orderService.findOne(id);
   }
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOrderDto: any): Promise<Order> {

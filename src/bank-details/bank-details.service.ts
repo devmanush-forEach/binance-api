@@ -8,7 +8,7 @@ export class BankDetailsService {
   constructor(
     @InjectModel(BankDetails.name)
     private bankDetailsModel: Model<BankDetailsDocument>,
-  ) {}
+  ) { }
 
   async create(createBankDetailsDto: any): Promise<BankDetails> {
     const createdBankDetails = new this.bankDetailsModel(createBankDetailsDto);
@@ -21,8 +21,9 @@ export class BankDetailsService {
 
   async findAllByUserId(
     userId: string,
-  ): Promise<{ _id: string; upis: BankDetails[] }[]> {
-    return this.bankDetailsModel.aggregate([
+  ): Promise<any> {
+    const result = {};
+    const bankDetails = await this.bankDetailsModel.aggregate([
       { $match: { userId, transactionMethodId: { $ne: null } } },
       {
         $group: {
@@ -31,6 +32,11 @@ export class BankDetailsService {
         },
       },
     ]);
+
+    bankDetails?.forEach((method) => {
+      result[method._id] = method.upis;
+    })
+    return result;
   }
 
   async findOne(id: string): Promise<BankDetails> {

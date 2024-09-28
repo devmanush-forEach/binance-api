@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { Types } from 'mongoose';
 import { WalletValue } from './crypto/crypto.schema';
+import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
 
 @Controller('wallet')
 export class WalletController {
@@ -13,7 +14,8 @@ export class WalletController {
     return this.walletService.createWallet(id);
   }
 
-  @Get(':userId')
+  @Get()
+  @UseGuards(JwtAuthGuard)
   async getWallet(@Param('userId') userId: string) {
     const id = new Types.ObjectId(userId);
     return this.walletService.getWalletByUserId(id);
