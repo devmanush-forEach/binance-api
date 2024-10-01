@@ -15,6 +15,7 @@ import { TransactionMethodsModule } from './transactions-methods/transaction-met
 import { WalletModule } from './wallet/wallet.module';
 import { AdvertisementModule } from './advertisement/advertisement.module';
 import { CurrencyModule } from './currency/currency.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { CurrencyModule } from './currency/currency.module';
     WalletModule,
     AdvertisementModule,
     CurrencyModule,
+    ChatModule,
     // OTPModule
   ],
   controllers: [AppController],
