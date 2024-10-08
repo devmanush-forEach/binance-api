@@ -5,7 +5,7 @@ import { Coin, CoinDocument } from './coin.schema';
 
 @Injectable()
 export class CoinService {
-  constructor(@InjectModel(Coin.name) private coinModel: Model<CoinDocument>) { }
+  constructor(@InjectModel(Coin.name) private coinModel: Model<CoinDocument>) {}
 
   async create(createCoinDto: any): Promise<Coin> {
     const createdCoin = new this.coinModel(createCoinDto);
@@ -17,7 +17,16 @@ export class CoinService {
   }
 
   async findAll(): Promise<Coin[]> {
-    return this.coinModel.find().populate('currency').exec();
+    return this.coinModel
+      .find()
+      .populate([
+        'currency',
+        {
+          path: 'networks.networkId',
+          model: 'Network',
+        },
+      ])
+      .exec();
   }
 
   async findOne(id: string): Promise<Coin> {

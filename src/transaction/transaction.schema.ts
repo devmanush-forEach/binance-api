@@ -1,9 +1,8 @@
-// src/transactions/schemas/transaction.schema.ts
-
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Currency } from 'src/currency/currency.schema';
 import { User } from 'src/user/user.schema';
+import { Network } from 'src/network/network.schema';
+import { Coin } from 'src/coin/coin.schema';
 
 export type TransactionDocument = Transaction & Document;
 
@@ -12,26 +11,23 @@ export type TransactionDocument = Transaction & Document;
   versionKey: false,
 })
 export class Transaction {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: false, unique: true })
   transactionId: string;
-
-  @Prop({ required: true })
-  amount: number;
-
-  @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
-  currency: Types.ObjectId;
-
-  @Prop({ required: true, enum: ['credit', 'debit'] })
-  transactionType: string;
-
-  @Prop({ required: true })
-  description: string;
 
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   user: Types.ObjectId;
 
   @Prop({ required: true })
-  date: Date;
+  amount: number;
+
+  @Prop({ type: Types.ObjectId, ref: Coin.name, required: true })
+  coin: Types.ObjectId;
+
+  @Prop({ required: true, enum: ['credit', 'debit'] })
+  transactionType: string;
+
+  @Prop({ required: false })
+  description: string;
 
   @Prop({
     required: true,
@@ -39,6 +35,9 @@ export class Transaction {
     default: 'pending',
   })
   status: string;
+
+  @Prop({ type: Types.ObjectId, ref: Network.name, required: true })
+  network: Types.ObjectId;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

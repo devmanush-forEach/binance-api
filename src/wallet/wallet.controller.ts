@@ -6,19 +6,17 @@ import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
 
 @Controller('wallet')
 export class WalletController {
-  constructor(private readonly walletService: WalletService) { }
+  constructor(private readonly walletService: WalletService) {}
 
   @Post('create/:userId')
   async createWallet(@Param('userId') userId: string) {
-    const id = new Types.ObjectId(userId);
-    return this.walletService.createWallet(id);
+    return this.walletService.createWallet(userId);
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
   async getWallet(@Param('userId') userId: string) {
-    const id = new Types.ObjectId(userId);
-    return this.walletService.getWalletByUserId(id);
+    return this.walletService.getWalletByUserId(userId);
   }
 
   @Post('add/:userId')

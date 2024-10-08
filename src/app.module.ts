@@ -16,6 +16,7 @@ import { WalletModule } from './wallet/wallet.module';
 import { AdvertisementModule } from './advertisement/advertisement.module';
 import { CurrencyModule } from './currency/currency.module';
 import { ChatModule } from './chat/chat.module';
+import { NetworkModule } from './network/network.module';
 
 @Module({
   imports: [
@@ -39,9 +40,10 @@ import { ChatModule } from './chat/chat.module';
     AdvertisementModule,
     CurrencyModule,
     ChatModule,
+    NetworkModule,
     // OTPModule
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
