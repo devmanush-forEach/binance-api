@@ -14,6 +14,12 @@ export class Transaction {
   @Prop({ required: false, unique: true })
   transactionId: string;
 
+  @Prop({ required: false })
+  withdrawAddress: string;
+
+  @Prop({ required: false })
+  depositAddress: string;
+
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   user: Types.ObjectId;
 

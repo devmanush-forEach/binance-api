@@ -1,13 +1,21 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class DepositDto {
   @IsString()
   @IsNotEmpty()
-  coinId: string; // Coin symbol like 'BTC', 'ETH'
+  coinId: string;
 
   @IsString()
   @IsNotEmpty()
-  networkId: string; // Network like 'ERC20', 'TRC20'
+  networkId: string;
 
   @IsNumber()
   @IsNotEmpty()
@@ -15,11 +23,11 @@ export class DepositDto {
 
   @IsString()
   @IsNotEmpty()
-  address: string;
+  transactionId: string;
 
   @IsString()
   @IsNotEmpty()
-  transactionId: string;
+  depositAddress: string;
 }
 
 export class WithdrawalDto {
@@ -37,5 +45,54 @@ export class WithdrawalDto {
 
   @IsString()
   @IsNotEmpty()
-  address: string; // Withdrawal address
+  withdrawAddress: string;
+}
+
+export enum TransactionType {
+  DEPOSIT = 'DEPOSIT',
+  WITHDRAWAL = 'WITHDRAWAL',
+}
+
+export class SearchTransactionsDto {
+  @IsOptional()
+  @IsString()
+  user?: string;
+
+  @IsOptional()
+  @IsString()
+  coin?: string;
+
+  @IsOptional()
+  @IsEnum(TransactionType)
+  transactionType?: TransactionType;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsString()
+  network?: string;
+
+  @IsOptional()
+  @IsString()
+  transactionId?: string;
+
+  @IsOptional()
+  @IsString()
+  withdrawAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  depositAddress?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  page?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  limit?: number;
 }

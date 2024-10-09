@@ -9,16 +9,22 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid'; // Import UUID generator
 import { Transaction, TransactionDocument } from './transaction.schema';
-import { DepositDto, WithdrawalDto } from './dto/transaction.dto';
-import { WalletDocument } from 'src/wallet/wallet.schema';
+import {
+  DepositDto,
+  SearchTransactionsDto,
+  WithdrawalDto,
+} from './dto/transaction.dto';
+import { Wallet, WalletDocument } from 'src/wallet/wallet.schema';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
+import { WalletValue } from 'src/wallet/crypto/crypto.schema';
 
 @Injectable()
 export class TransactionService {
   constructor(
     @InjectModel(Transaction.name)
     private transactionModel: Model<TransactionDocument>,
-    @InjectModel(Transaction.name)
-    private walletModel: Model<WalletDocument>,
+    @InjectModel(Wallet.name) private walletModel: Model<WalletDocument>,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async create(createTransactionDto: any): Promise<Transaction> {
@@ -40,6 +46,58 @@ export class TransactionService {
     return this.transactionModel.find().populate('user', 'name').exec(); // Adjust fields to populate as needed
   }
 
+  async searchTransactions(filters: SearchTransactionsDto): Promise<any> {
+    const query: any = {};
+
+    if (filters.user) {
+      query.user = filters.user;
+    }
+
+    if (filters.coin) {
+      query.coin = filters.coin;
+    }
+
+    if (filters.transactionType) {
+      query.transactionType = filters.transactionType;
+    }
+
+    if (filters.status) {
+      query.status = filters.status;
+    }
+
+    if (filters.network) {
+      query.network = filters.network;
+    }
+
+    if (filters.transactionId) {
+      query.transactionId = filters.transactionId;
+    }
+
+    if (filters.withdrawAddress) {
+      query.withdrawAddress = filters.withdrawAddress;
+    }
+
+    if (filters.depositAddress) {
+      query.depositAddress = filters.depositAddress;
+    }
+
+    const page = filters.page || 1;
+    const limit = filters.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const [results, total] = await Promise.all([
+      this.transactionModel.find(query).skip(skip).limit(limit).exec(),
+      this.transactionModel.countDocuments(query),
+    ]);
+
+    return {
+      transactions: results,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
+  }
+
   async findOne(id: string): Promise<Transaction> {
     const transaction = await this.transactionModel
       .findById(id)
@@ -52,87 +110,186 @@ export class TransactionService {
   }
 
   async deposit(userId: string, depositDto: DepositDto) {
-    const { coinId, networkId, amount, address, transactionId } = depositDto;
+    try {
+      const { coinId, networkId, amount, transactionId, depositAddress } =
+        depositDto;
+      const transaction = new this.transactionModel({
+        transactionId,
+        depositAddress,
+        amount,
+        user: userId,
+        transactionType: 'credit',
+        coin: coinId,
+        network: networkId,
+        status: 'pending',
+      });
 
-    // let wallet = await this.getWalletByUserId(userId);
-    // if (!wallet) {
-    //   const newWallet = new this.walletModel({ userId, walletValues: [] });
-    //   const walletValues = wallet.walletValues || [];
-    //   const cId = new Types.ObjectId(coinId);
-    //   const value: WalletValue = {
-    //     coin: cId,
-    //     balance: amount,
-    //     address: 'kgjhd ghdfgk jdfshgdfh gdfgh dgh',
-    //   };
-
-    //   newWallet.walletValues = walletValues;
-    //   newWallet.save();
-    // }
-
-    // Find the coin in the wallet
-    // const coinWallet = wallet..find(
-    //   (coin) => coin.coin.symbol === coinSymbol,
-    // );
-    // if (!coinWallet) {
-    //   throw new BadRequestException('Coin not found in wallet');
-    // }
-
-    // // Save deposit transaction
-    const transaction = new this.transactionModel({
-      transactionId,
-      amount,
-      user: userId,
-      transactionType: 'credit',
-      coin: coinId,
-      network: networkId,
-      address,
-      status: 'pending',
-    });
-    return transaction.save();
-
-    // // Add the deposited amount to the wallet balance
-    // coinWallet.balance += amount;
-    // await wallet.save();
-
-    // return transaction;
+      await transaction.save();
+      this.notificationsGateway.sendDepositRequestNotification(transaction);
+      return transaction;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
   }
 
   async withdraw(userId: string, withdrawalDto: WithdrawalDto) {
-    const { coinId, networkId, amount, address } = withdrawalDto;
+    try {
+      const { coinId, networkId, amount, withdrawAddress } = withdrawalDto;
 
-    const wallet = await this.walletModel.findOne({ userId }).lean().exec();
-    if (!wallet) {
-      throw new BadRequestException('Wallet not found');
+      const wallet = await this.walletModel.findOne({ userId });
+      if (!wallet) {
+        throw new BadRequestException('Wallet not found');
+      }
+
+      const cId = new Types.ObjectId(coinId);
+
+      const coinWallet = wallet.walletValues.find(
+        (walletValue) => walletValue.coin == cId,
+      );
+      if (!coinWallet) {
+        throw new BadRequestException('Coin not found in wallet');
+      }
+
+      if (coinWallet.balance < amount) {
+        throw new BadRequestException('Insufficient balance');
+      }
+
+      const transaction = new this.transactionModel({
+        amount,
+        user: userId,
+        transactionType: 'debit',
+        coin: coinId,
+        network: networkId,
+        withdrawAddress,
+        status: 'pending',
+      });
+      coinWallet.balance -= amount;
+
+      await wallet.save();
+      await transaction.save();
+      this.notificationsGateway.sendWithdrawalRequestNotification(transaction);
+
+      return transaction;
+    } catch (error) {
+      console.log(error);
     }
+  }
 
-    const cId = new Types.ObjectId(coinId);
+  async complete(id: string): Promise<any> {
+    try {
+      const transaction = await this.transactionModel.findById(id);
+      if (!transaction) {
+        throw new NotFoundException(`Transaction with ID ${id} not found`);
+      }
 
-    const coinWallet = wallet.walletValues.find(
-      (walletValue) => walletValue.coin == cId,
-    );
-    if (!coinWallet) {
-      throw new BadRequestException('Coin not found in wallet');
+      const userId = transaction.user;
+      const coinId = transaction.coin;
+      const transactionAmount = transaction.amount;
+
+      const wallet = await this.walletModel.findOne({
+        userId: '66e18fc127b215d986ed4a0a',
+      });
+
+      if (transaction.status !== 'pending') {
+        throw new NotFoundException(
+          `Transaction is already ${transaction.status}`,
+        );
+      }
+
+      if (transaction.transactionType === 'credit') {
+        if (!wallet) {
+          const newWallet = new this.walletModel({
+            userId,
+            walletValues: [],
+          });
+          const walletValues = newWallet.walletValues || [];
+          const cId = new Types.ObjectId(coinId);
+          const value: WalletValue = {
+            coin: cId,
+            balance: transactionAmount,
+            address: 'kgjhd ghdfgk jdfshgdfh gdfgh dgh',
+          };
+          newWallet.walletValues = walletValues;
+          newWallet.save();
+        } else {
+          let walletValues: WalletValue[] = wallet.walletValues;
+
+          const coinWallet = walletValues.find(
+            (walletValue) => walletValue.coin === coinId,
+          );
+          if (coinWallet) {
+            walletValues = walletValues.map((walletValue: WalletValue) => {
+              if (walletValue.coin === coinId) {
+                return {
+                  ...walletValue,
+                  balance: walletValue.balance + transactionAmount,
+                };
+              }
+              return walletValue;
+            });
+          } else {
+            walletValues.push({
+              coin: coinId,
+              address: 'dkjfh skldjfh askdfj h',
+              balance: transactionAmount,
+            });
+          }
+
+          wallet.walletValues = walletValues;
+          wallet.save();
+        }
+        transaction.status = 'completed';
+        await transaction.save();
+      } else if (transaction.transactionType === 'debit') {
+        if (!wallet) {
+          throw new NotFoundException(
+            `Wallet with user ID ${userId} not found`,
+          );
+        }
+        transaction.status = 'completed';
+        await transaction.save();
+      }
+      return transaction;
+    } catch (error) {
+      console.log(error);
+      return null;
     }
+  }
 
-    if (coinWallet.balance < amount) {
-      throw new BadRequestException('Insufficient balance');
+  async fail(id: string): Promise<any> {
+    const transaction = await this.transactionModel
+      .findByIdAndUpdate(id, { status: 'failed' }, { new: true })
+      .populate('user', 'name')
+      .exec();
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction with ID ${id} not found`);
     }
+    const userId = transaction.user;
+    const coinId = transaction.coin;
+    const transactionAmount = transaction.amount;
 
-    const transaction = new this.transactionModel({
-      amount,
-      user: userId,
-      transactionType: 'debit',
-      coin: coinId,
-      network: networkId,
-      address,
-      status: 'pending',
-    });
-    return transaction.save();
+    const wallet = await this.walletModel.findOne({ userId });
 
-    // // Subtract the withdrawal amount from the wallet balance
-    // coinWallet.balance -= amount;
-    // await wallet.save();
+    if (transaction.transactionType === 'debit') {
+      if (!wallet) {
+        throw new NotFoundException(`Wallet with user ID ${userId} not found`);
+      }
 
+      wallet.walletValues = wallet.walletValues.map(
+        (walletValue: WalletValue) => {
+          if (walletValue.coin === coinId) {
+            return {
+              ...walletValue,
+              balance: walletValue.balance + transactionAmount,
+            };
+          }
+          return walletValue;
+        },
+      );
+      wallet.save();
+    }
     return transaction;
   }
 

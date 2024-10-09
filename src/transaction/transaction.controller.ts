@@ -9,11 +9,16 @@ import {
   Patch,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './transaction.schema';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
-import { DepositDto, WithdrawalDto } from './dto/transaction.dto';
+import {
+  DepositDto,
+  SearchTransactionsDto,
+  WithdrawalDto,
+} from './dto/transaction.dto';
 
 @Controller('transactions')
 export class TransactionController {
@@ -22,6 +27,13 @@ export class TransactionController {
   @Post()
   create(@Body() createTransactionDto: any): Promise<Transaction> {
     return this.transactionService.create(createTransactionDto);
+  }
+
+  @Get('/search')
+  searchTransactions(
+    @Query() filters: SearchTransactionsDto,
+  ): Promise<Transaction[]> {
+    return this.transactionService.searchTransactions(filters);
   }
 
   @Get()
@@ -50,6 +62,17 @@ export class TransactionController {
     @Body() withdrawDto: WithdrawalDto,
   ) {
     return this.transactionService.withdraw(userId, withdrawDto);
+  }
+  @Patch('complete/:id')
+  // @UseGuards(JwtAuthGuard)
+  async complete(@Param('userId') userId: string, @Param('id') id: string) {
+    return this.transactionService.complete(id);
+  }
+
+  @Patch('fail/:id')
+  @UseGuards(JwtAuthGuard)
+  async fail(@Param('userId') userId: string, @Param('id') id: string) {
+    return this.transactionService.fail(id);
   }
 
   @Patch(':id')

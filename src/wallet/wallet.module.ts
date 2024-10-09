@@ -14,8 +14,8 @@ import { CoinModule } from 'src/coin/coin.module';
     MongooseModule.forFeature([{ name: Wallet.name, schema: WalletSchema }]),
     MongooseModule.forFeature([{ name: Coin.name, schema: CoinSchema }]),
   ],
-  providers: [WalletService],
   controllers: [WalletController],
-  exports: [WalletService],
+  exports: [WalletService, MongooseModule],
+  providers: [WalletService, Wallet],
 })
-export class WalletModule { }
+export class WalletModule {}
