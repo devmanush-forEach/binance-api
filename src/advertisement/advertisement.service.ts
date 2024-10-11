@@ -6,13 +6,15 @@ import {
   CreateAdvertisementDto,
   UpdateAdvertisementDto,
 } from './dto/advertisement.dto';
+import { WalletService } from 'src/wallet/wallet.service';
 
 @Injectable()
 export class AdvertisementService {
   constructor(
     @InjectModel(Advertisement.name)
     private advertisementModel: Model<Advertisement>,
-  ) { }
+    private walletService: WalletService,
+  ) {}
 
   async create(
     createAdvertisementDto: CreateAdvertisementDto,
@@ -24,24 +26,42 @@ export class AdvertisementService {
   }
 
   async findAll(): Promise<Advertisement[]> {
-    return this.advertisementModel.find().populate({
-      path: 'userId',
-      select: 'username email',
-    }).populate('paymentMethods').populate('currency').populate('coinId').exec();
+    return this.advertisementModel
+      .find()
+      .populate({
+        path: 'userId',
+        select: 'username email',
+      })
+      .populate('paymentMethods')
+      .populate('currency')
+      .populate('coinId')
+      .exec();
   }
 
   async getBuyAdvertisements(): Promise<Advertisement[]> {
-    return await this.advertisementModel.find({ adType: 'buy' }).populate({
-      path: 'userId',
-      select: 'username email',
-    }).populate('paymentMethods').populate('currency').populate('coinId').exec();;
+    return await this.advertisementModel
+      .find({ adType: 'buy' })
+      .populate({
+        path: 'userId',
+        select: 'username email',
+      })
+      .populate('paymentMethods')
+      .populate('currency')
+      .populate('coinId')
+      .exec();
   }
 
   async getSellAdvertisements(): Promise<Advertisement[]> {
-    return await this.advertisementModel.find({ adType: 'sell' }).populate({
-      path: 'userId',
-      select: 'username email',
-    }).populate('paymentMethods').populate('currency').populate('coinId').exec();;
+    return await this.advertisementModel
+      .find({ adType: 'sell' })
+      .populate({
+        path: 'userId',
+        select: 'username email',
+      })
+      .populate('paymentMethods')
+      .populate('currency')
+      .populate('coinId')
+      .exec();
   }
 
   async searchAdvertisements(
@@ -51,8 +71,8 @@ export class AdvertisementService {
       coinId?: string;
     },
     page: number = 1,
-    limit: number = 10
-  ): Promise<Advertisement[]> {
+    limit: number = 10,
+  ): Promise<any> {
     const queryFilter: any = {};
 
     if (filters.userId) {
@@ -67,23 +87,55 @@ export class AdvertisementService {
 
     const skip = (page - 1) * limit;
 
-    return await this.advertisementModel
+    const query = this.advertisementModel
       .find(queryFilter)
-      .populate({
-        path: 'userId',
-        select: 'username email',
-      })
-      .populate('paymentMethods')
-      .populate('currency')
-      .populate('coinId')
+      .populate([
+        'paymentMethods',
+        'currency',
+        'coinId',
+        {
+          path: 'userId',
+          select: 'username email',
+        },
+      ])
       .skip(skip)
       .limit(limit)
+      .lean()
       .exec();
+
+    const [ads, total] = await Promise.all([
+      query,
+      this.advertisementModel.countDocuments(queryFilter),
+    ]);
+
+    let advertisements = [];
+
+    for (let ad of ads) {
+      const userId = ad.userId._id.toString();
+      const coinId = ad.coinId._id.toString();
+      const walletValue = await this.walletService.getCoinBalanceByUserId(
+        userId,
+        coinId,
+      );
+      if (walletValue?.balance > 0)
+        advertisements.push({ ...ad, availableCoin: walletValue?.balance });
+    }
+    const response = {
+      advertisements,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
+
+    return response;
   }
 
-
   async findAllByUserId(userId: string): Promise<Advertisement[]> {
-    return this.advertisementModel.find({ userId }).populate('paymentMethods').populate('coinId').exec();
+    return this.advertisementModel
+      .find({ userId })
+      .populate('paymentMethods')
+      .populate('coinId')
+      .exec();
   }
 
   async findOne(id: string): Promise<Advertisement> {

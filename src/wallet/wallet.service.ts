@@ -36,6 +36,24 @@ export class WalletService {
     if (!wallet) throw new NotFoundException('Wallet not found');
     return wallet;
   }
+  async getCoinBalanceByUserId(
+    userId: string,
+    coinId: string,
+  ): Promise<WalletValue> {
+    const wallet = await this.walletModel
+      .findOne({ userId })
+      .select({ userId: 0 })
+      .lean()
+      .exec();
+
+    if (!wallet) throw new NotFoundException('Wallet not found');
+
+    const walletValueWithCoin = wallet?.walletValues?.find(
+      (value) => value.coin.toString() === coinId,
+    );
+
+    return walletValueWithCoin;
+  }
 
   async addCryptoToWallet(
     userId: Types.ObjectId,

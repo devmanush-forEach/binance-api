@@ -48,10 +48,7 @@ export class WithdrawalDto {
   withdrawAddress: string;
 }
 
-export enum TransactionType {
-  DEPOSIT = 'DEPOSIT',
-  WITHDRAWAL = 'WITHDRAWAL',
-}
+export type TransactionType = 'credit' | 'debit';
 
 export class SearchTransactionsDto {
   @IsOptional()
@@ -63,7 +60,6 @@ export class SearchTransactionsDto {
   coin?: string;
 
   @IsOptional()
-  @IsEnum(TransactionType)
   transactionType?: TransactionType;
 
   @IsOptional()

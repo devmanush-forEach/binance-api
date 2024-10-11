@@ -53,8 +53,7 @@ export class CreateAdvertisementDto {
 
 export class UpdateAdvertisementDto extends PartialType(
   CreateAdvertisementDto,
-) { }
-
+) {}
 
 export class GetAdvertisementsDto {
   @IsOptional()
@@ -70,14 +69,32 @@ export class GetAdvertisementsDto {
   coinId?: string;
 
   @IsOptional()
-  @IsNumberString()
-  @Type(() => Number)
   @Min(1)
   page?: number = 1;
 
   @IsOptional()
-  @IsNumberString()
-  @Type(() => Number)
+  @Min(10)
+  limit?: number = 10;
+}
+
+export class SearchAdvertisementsDto {
+  @IsOptional()
+  @IsString()
+  userId?: string;
+
+  @IsOptional()
+  @IsString()
+  adType?: string;
+
+  @IsOptional()
+  @IsString()
+  coinId?: string;
+
+  @IsOptional()
   @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Min(10)
   limit?: number = 10;
 }

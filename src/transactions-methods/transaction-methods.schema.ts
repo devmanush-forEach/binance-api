@@ -18,8 +18,8 @@ export class TransactionMethods {
   @Prop({ required: true })
   color: string;
 
-  @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
-  currency: Types.ObjectId;
+  @Prop([{ type: Types.ObjectId, ref: Currency.name, required: true }])
+  supportedCurrencies: Types.ObjectId[];
 }
 
 export const TransactionMethodsSchema =

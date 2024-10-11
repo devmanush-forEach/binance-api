@@ -23,11 +23,7 @@ export class TransactionMethodsService {
   }
 
   async findAll(): Promise<TransactionMethods[]> {
-    return this.transactionMethodsModel
-      .find()
-      .populate('currency')
-      .lean()
-      .exec();
+    return this.transactionMethodsModel.find().lean().exec();
   }
 
   async findOne(id: string): Promise<TransactionMethods> {

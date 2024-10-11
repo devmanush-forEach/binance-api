@@ -13,6 +13,7 @@ import { AdvertisementService } from './advertisement.service';
 import {
   CreateAdvertisementDto,
   GetAdvertisementsDto,
+  SearchAdvertisementsDto,
   UpdateAdvertisementDto,
 } from './dto/advertisement.dto';
 import { Advertisement } from './advertisement.schema';
@@ -20,7 +21,7 @@ import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
 
 @Controller('advertisements')
 export class AdvertisementController {
-  constructor(private readonly advertisementService: AdvertisementService) { }
+  constructor(private readonly advertisementService: AdvertisementService) {}
 
   @Post()
   async create(@Body() createAdvertisementDto: CreateAdvertisementDto) {
@@ -33,11 +34,10 @@ export class AdvertisementController {
   }
 
   @Get('search')
-  async getBuyAdvertisements(
-    @Query() query: GetAdvertisementsDto,
-  ): Promise<Advertisement[]> {
+  async searchAdvertisements(
+    @Query() query: SearchAdvertisementsDto,
+  ): Promise<any> {
     const { userId, adType, coinId, page, limit } = query;
-
     return this.advertisementService.searchAdvertisements(
       { userId, adType, coinId },
       page,
@@ -45,10 +45,12 @@ export class AdvertisementController {
     );
   }
 
-
   @Get('user')
   @UseGuards(JwtAuthGuard)
-  async findAllForUser(@Param('userId') userId: string, @Query() query: GetAdvertisementsDto,) {
+  async findAllForUser(
+    @Param('userId') userId: string,
+    @Query() query: GetAdvertisementsDto,
+  ) {
     const { adType, coinId, page, limit } = query;
     return this.advertisementService.searchAdvertisements(
       { userId, adType, coinId },

@@ -43,7 +43,10 @@ export class TransactionService {
   }
 
   async findAll(): Promise<Transaction[]> {
-    return this.transactionModel.find().populate('user', 'name').exec(); // Adjust fields to populate as needed
+    return this.transactionModel
+      .find()
+      .populate(['coin', 'user', 'network'])
+      .exec();
   }
 
   async searchTransactions(filters: SearchTransactionsDto): Promise<any> {
@@ -85,23 +88,50 @@ export class TransactionService {
     const limit = filters.limit || 10;
     const skip = (page - 1) * limit;
 
-    const [results, total] = await Promise.all([
-      this.transactionModel.find(query).skip(skip).limit(limit).exec(),
+    const [results, total, statusCounts] = await Promise.all([
+      this.transactionModel
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .populate(['coin', 'user', 'network'])
+        .exec(),
       this.transactionModel.countDocuments(query),
+      this.transactionModel.aggregate([
+        {
+          $match: {
+            ...query,
+            status: { $in: ['completed', 'failed', 'pending'] },
+          },
+        },
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 },
+          },
+        },
+      ]),
     ]);
+
+    const statusCountsFormatted = statusCounts.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
 
     return {
       transactions: results,
       total,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
+      pending: statusCountsFormatted?.pending || 0,
+      completed: statusCountsFormatted?.completed || 0,
+      failed: statusCountsFormatted?.failed || 0,
     };
   }
 
   async findOne(id: string): Promise<Transaction> {
     const transaction = await this.transactionModel
       .findById(id)
-      .populate('user', 'name')
+      .populate(['coin', 'user', 'network'])
       .exec();
     if (!transaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
@@ -260,7 +290,6 @@ export class TransactionService {
   async fail(id: string): Promise<any> {
     const transaction = await this.transactionModel
       .findByIdAndUpdate(id, { status: 'failed' }, { new: true })
-      .populate('user', 'name')
       .exec();
 
     if (!transaction) {
@@ -296,7 +325,7 @@ export class TransactionService {
   async update(id: string, updateTransactionDto: any): Promise<Transaction> {
     const updatedTransaction = await this.transactionModel
       .findByIdAndUpdate(id, updateTransactionDto, { new: true })
-      .populate('user', 'name')
+      .populate(['coin', 'user', 'network'])
       .exec();
     if (!updatedTransaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);

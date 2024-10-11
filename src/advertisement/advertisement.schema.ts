@@ -10,6 +10,11 @@ export enum AdType {
   SELL = 'sell',
 }
 
+export enum StatusType {
+  BUY = 'online',
+  SELL = 'offline',
+}
+
 @Schema({ timestamps: true })
 export class Advertisement extends Document {
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })
@@ -17,6 +22,9 @@ export class Advertisement extends Document {
 
   @Prop({ enum: AdType, required: true })
   adType: AdType;
+
+  @Prop({ type: Boolean, required: true })
+  isOnline: boolean;
 
   @Prop({ type: Boolean, required: true })
   isDynamicPrice: boolean;
@@ -42,12 +50,15 @@ export class Advertisement extends Document {
   @Prop({ type: String })
   transactionRemark: string;
 
-  @Prop({ type: [Types.ObjectId], ref: TransactionMethods.name, required: true })
+  @Prop({
+    type: [Types.ObjectId],
+    ref: TransactionMethods.name,
+    required: true,
+  })
   paymentMethods: Types.ObjectId[];
 
   @Prop({ type: Types.ObjectId, ref: Coin.name, required: true })
   coinId: Types.ObjectId;
-
 }
 
 export const AdvertisementSchema = SchemaFactory.createForClass(Advertisement);

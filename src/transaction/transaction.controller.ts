@@ -70,7 +70,7 @@ export class TransactionController {
   }
 
   @Patch('fail/:id')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async fail(@Param('userId') userId: string, @Param('id') id: string) {
     return this.transactionService.fail(id);
   }

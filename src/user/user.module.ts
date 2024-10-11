@@ -9,6 +9,7 @@ import { UPIDetailsModule } from 'src/upi-details/upi-details.module';
 import { BankDetailsModule } from 'src/bank-details/bank-details.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { TransactionMethodsModule } from 'src/transactions-methods/transaction-methods.module';
+import { PaymentServicesModule } from './payment-services/payment-service.module';
 
 @Module({
   imports: [
@@ -16,11 +17,12 @@ import { TransactionMethodsModule } from 'src/transactions-methods/transaction-m
     UPIDetailsModule,
     BankDetailsModule,
     TransactionMethodsModule,
+    PaymentServicesModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    forwardRef(() => AuthModule)
+    forwardRef(() => AuthModule),
   ],
   providers: [UserService],
   controllers: [UserController],
   exports: [UserService],
 })
-export class UserModule { }
+export class UserModule {}
