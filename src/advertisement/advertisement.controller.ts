@@ -34,12 +34,13 @@ export class AdvertisementController {
   }
 
   @Get('search')
+  @UseGuards(JwtAuthGuard)
   async searchAdvertisements(
     @Query() query: SearchAdvertisementsDto,
   ): Promise<any> {
-    const { userId, adType, coinId, page, limit } = query;
+    const { adType, coinId, page, limit } = query;
     return this.advertisementService.searchAdvertisements(
-      { userId, adType, coinId },
+      { adType, coinId },
       page,
       limit,
     );

@@ -34,7 +34,6 @@ export class PaymentServices {
     required: function () {
       return this.paymentType === 'BANK';
     },
-    unique: true,
   })
   accountNumber: string;
 
@@ -42,7 +41,6 @@ export class PaymentServices {
     required: function () {
       return this.paymentType === 'UPI';
     },
-    unique: true,
   })
   upiId: string;
 
@@ -58,3 +56,13 @@ export class PaymentServices {
 
 export const PaymentServicesSchema =
   SchemaFactory.createForClass(PaymentServices);
+
+PaymentServicesSchema.index(
+  { accountNumber: 1 },
+  { unique: true, partialFilterExpression: { accountNumber: { $ne: null } } },
+);
+
+PaymentServicesSchema.index(
+  { upiId: 1 },
+  { unique: true, partialFilterExpression: { upiId: { $ne: null } } },
+);

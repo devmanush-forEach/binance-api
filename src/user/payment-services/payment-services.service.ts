@@ -23,13 +23,22 @@ export class PaymentServicesService {
   async create(
     createPaymentServicesDto: CreatePaymentServicesDto,
   ): Promise<PaymentServices> {
-    const createdPaymentService = new this.paymentServicesModel({
-      ...createPaymentServicesDto,
-      transactionMethodId: new Types.ObjectId(
+    try {
+      const transactionMethodId = new Types.ObjectId(
         createPaymentServicesDto.transactionMethodId,
-      ),
-    });
-    return createdPaymentService.save();
+      );
+
+      const createdPaymentService = new this.paymentServicesModel({
+        ...createPaymentServicesDto,
+        transactionMethodId,
+      });
+      console.log(createdPaymentService);
+      const response = await createdPaymentService.save();
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async findAll(): Promise<PaymentServices[]> {
@@ -45,15 +54,15 @@ export class PaymentServicesService {
           from: 'transactionmethods',
           localField: 'transactionMethodId',
           foreignField: '_id',
-          as: 'transactionMethodDetails',
+          as: 'transactionMethodId',
         },
       },
       {
-        $unwind: '$transactionMethodDetails',
+        $unwind: '$transactionMethodId',
       },
       {
         $group: {
-          _id: '$transactionMethodDetails',
+          _id: '$transactionMethodId',
           paymentServices: { $push: '$$ROOT' },
         },
       },

@@ -9,7 +9,7 @@ import { Order, OrderDocument } from './order.schema';
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
-  ) { }
+  ) {}
 
   async create(createOrderDto: any): Promise<Order> {
     const createdOrder = new this.orderModel(createOrderDto);
@@ -23,14 +23,38 @@ export class OrderService {
   async findOne(id: string): Promise<Order> {
     const order = await this.orderModel
       .findById(id)
-      .populate('ad')
+      .populate([
+        {
+          path: 'ad',
+          populate: [
+            {
+              path: 'coinId',
+              model: 'Coin',
+            },
+            {
+              path: 'currency',
+              model: 'Currency',
+            },
+            {
+              path: 'userId',
+              model: 'User',
+            },
+          ],
+        },
+        'user',
+        'transactionMethod',
+        'paymentService',
+      ])
       .exec();
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
     return order;
   }
-  async findAllForUser(userId: string, filters: { page?: number; type?: string; status?: string }): Promise<Order[]> {
+  async findAllForUser(
+    userId: string,
+    filters: { page?: number; type?: string; status?: string },
+  ): Promise<Order[]> {
     const { page = 1, type, status } = filters;
     const limit = 10;
     const skip = (page - 1) * limit;
@@ -49,16 +73,20 @@ export class OrderService {
       .find(filterConditions)
       .populate({
         path: 'ad',
-        populate: [{
-          path: 'coinId',
-          model: 'Coin'
-        }, {
-          path: 'currency',
-          model: 'Currency'
-        }, {
-          path: 'userId',
-          model: 'User'
-        }]
+        populate: [
+          {
+            path: 'coinId',
+            model: 'Coin',
+          },
+          {
+            path: 'currency',
+            model: 'Currency',
+          },
+          {
+            path: 'userId',
+            model: 'User',
+          },
+        ],
       })
       .limit(limit)
       .skip(skip)

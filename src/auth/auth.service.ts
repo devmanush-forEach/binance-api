@@ -11,7 +11,7 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async validateUser(phone: string, password: string): Promise<any> {
     const user = await this.userService.findUserByPhone(phone);
@@ -39,7 +39,7 @@ export class AuthService {
       cookie.serialize('access_token', token, {
         httpOnly: true,
         secure: true,
-        maxAge: 60 * 60,
+        maxAge: 60 * 60 * 24,
         sameSite: 'strict',
         path: '/',
       }),

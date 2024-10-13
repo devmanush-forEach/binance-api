@@ -3,6 +3,7 @@ import { Document, Types } from 'mongoose';
 import { Coin } from 'src/coin/coin.schema';
 import { Currency } from 'src/currency/currency.schema';
 import { TransactionMethods } from 'src/transactions-methods/transaction-methods.schema';
+import { PaymentServices } from 'src/user/payment-services/payment-services.schema';
 import { User } from 'src/user/user.schema';
 
 export enum AdType {
@@ -29,6 +30,9 @@ export class Advertisement extends Document {
   @Prop({ type: Boolean, required: true })
   isDynamicPrice: boolean;
 
+  @Prop({ type: Boolean, required: true })
+  isFixedPrice: boolean;
+
   @Prop({ type: Number, required: false })
   transactionPrice: number;
 
@@ -41,10 +45,13 @@ export class Advertisement extends Document {
   @Prop({ type: Number, required: true })
   transactionLimitMax: number;
 
+  @Prop({ type: Number, required: true })
+  transactionTimeLimit: number;
+
   @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
   currency: Types.ObjectId;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   transactionTitle: string;
 
   @Prop({ type: String })
@@ -53,12 +60,35 @@ export class Advertisement extends Document {
   @Prop({
     type: [Types.ObjectId],
     ref: TransactionMethods.name,
-    required: true,
+    required: function () {
+      return this.adType === 'buy';
+    },
+  })
+  transactionMethods: Types.ObjectId[];
+
+  @Prop({
+    type: [Types.ObjectId],
+    ref: PaymentServices.name,
+    required: function () {
+      return this.adType === 'sell';
+    },
   })
   paymentMethods: Types.ObjectId[];
 
   @Prop({ type: Types.ObjectId, ref: Coin.name, required: true })
   coinId: Types.ObjectId;
+
+  @Prop({
+    type: Object,
+    default: {
+      registeredDaysAgo: 0,
+      holdingsMoreThan: 0,
+    },
+  })
+  counterPartyConditions: {
+    registeredDaysAgo: number;
+    holdingsMoreThan: number;
+  };
 }
 
 export const AdvertisementSchema = SchemaFactory.createForClass(Advertisement);

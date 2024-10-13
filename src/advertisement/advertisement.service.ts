@@ -75,9 +75,6 @@ export class AdvertisementService {
   ): Promise<any> {
     const queryFilter: any = {};
 
-    if (filters.userId) {
-      queryFilter.userId = filters.userId;
-    }
     if (filters.adType) {
       queryFilter.adType = filters.adType;
     }
@@ -91,6 +88,14 @@ export class AdvertisementService {
       .find(queryFilter)
       .populate([
         'paymentMethods',
+        {
+          path: 'paymentMethods',
+          populate: {
+            path: 'transactionMethodId',
+            model: 'TransactionMethods',
+          },
+        },
+        'transactionMethods',
         'currency',
         'coinId',
         {
@@ -117,8 +122,13 @@ export class AdvertisementService {
         userId,
         coinId,
       );
-      if (walletValue?.balance > 0)
-        advertisements.push({ ...ad, availableCoin: walletValue?.balance });
+      if (ad.adType === 'sell' && walletValue?.balance < 1) {
+      } else {
+        advertisements.push({
+          ...ad,
+          availableCoin: walletValue?.balance || 0,
+        });
+      }
     }
     const response = {
       advertisements,
