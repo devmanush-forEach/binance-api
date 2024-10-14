@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Coin } from 'src/coin/coin.schema';
+import { Country } from 'src/country/country.schema';
 import { Currency } from 'src/currency/currency.schema';
 import { TransactionMethods } from 'src/transactions-methods/transaction-methods.schema';
 import { PaymentServices } from 'src/user/payment-services/payment-services.schema';
@@ -23,6 +24,9 @@ export class Advertisement extends Document {
 
   @Prop({ enum: AdType, required: true })
   adType: AdType;
+
+  @Prop({ type: Number, required: true })
+  amount: number;
 
   @Prop({ type: Boolean, required: true })
   isOnline: boolean;
@@ -50,6 +54,9 @@ export class Advertisement extends Document {
 
   @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
   currency: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: Country.name, required: true })
+  regions: Types.ObjectId;
 
   @Prop({ type: String })
   transactionTitle: string;

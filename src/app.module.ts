@@ -18,6 +18,7 @@ import { CurrencyModule } from './currency/currency.module';
 import { ChatModule } from './chat/chat.module';
 import { NetworkModule } from './network/network.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { CountryModule } from './country/country.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     ChatModule,
     NetworkModule,
     NotificationsModule,
+    CountryModule,
     // OTPModule
   ],
   controllers: [AppController],

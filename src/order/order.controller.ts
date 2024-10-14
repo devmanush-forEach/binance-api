@@ -14,10 +14,11 @@ import {
 import { OrderService } from './order.service';
 import { Order } from './order.schema';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
+import { OrderFilterDTO, OrderResponse } from './dto/order.dto';
 
 @Controller('orders')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) { }
+  constructor(private readonly orderService: OrderService) {}
 
   @Post()
   create(@Body() createOrderDto: any): Promise<Order> {
@@ -28,16 +29,9 @@ export class OrderController {
   @UseGuards(JwtAuthGuard)
   findAllForUser(
     @Param('userId') userId: string,
-    @Query('page') page?: number,
-    @Query('type') type?: string,
-    @Query('status') status?: string,
-  ): Promise<Order[]> {
-    return this.orderService.findAllForUser(userId, { page, type, status });
-  }
-
-  @Get()
-  findAll(): Promise<Order[]> {
-    return this.orderService.findAll();
+    @Query() filters: OrderFilterDTO,
+  ): Promise<OrderResponse> {
+    return this.orderService.findAllForUser(userId, filters);
   }
 
   @Get(':id')
@@ -45,6 +39,10 @@ export class OrderController {
     return this.orderService.findOne(id);
   }
 
+  @Get()
+  findAll(): Promise<Order[]> {
+    return this.orderService.findAll();
+  }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOrderDto: any): Promise<Order> {

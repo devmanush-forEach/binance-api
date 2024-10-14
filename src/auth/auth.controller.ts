@@ -22,7 +22,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private userService: UserService,
-  ) { }
+  ) {}
 
   @Get('jwt')
   async validateJwt(@Req() req: Request, @Res() res: Response) {

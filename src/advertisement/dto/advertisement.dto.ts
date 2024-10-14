@@ -52,6 +52,10 @@ export class CreateAdvertisementDto {
   transactionPrice?: number;
 
   @IsNumber()
+  @IsNotEmpty()
+  amount: number;
+
+  @IsNumber()
   @IsOptional()
   pricePercent?: number;
 
@@ -88,6 +92,11 @@ export class CreateAdvertisementDto {
   @IsMongoId({ each: true })
   @IsOptional()
   paymentMethods?: Types.ObjectId[];
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  regions?: Types.ObjectId[];
 
   @IsMongoId()
   @IsNotEmpty()

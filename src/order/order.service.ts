@@ -4,6 +4,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order, OrderDocument } from './order.schema';
+import { OrderFilterDTO, OrderResponse } from './dto/order.dto';
 
 @Injectable()
 export class OrderService {
@@ -53,9 +54,18 @@ export class OrderService {
   }
   async findAllForUser(
     userId: string,
-    filters: { page?: number; type?: string; status?: string },
-  ): Promise<Order[]> {
-    const { page = 1, type, status } = filters;
+    filters: OrderFilterDTO,
+  ): Promise<OrderResponse> {
+    const {
+      page = 1,
+      type,
+      status,
+      coinId,
+      currencyId,
+      dateRange,
+      orderNo,
+    } = filters;
+
     const limit = 10;
     const skip = (page - 1) * limit;
 
@@ -69,7 +79,30 @@ export class OrderService {
       filterConditions.status = status;
     }
 
-    return this.orderModel
+    if (orderNo) {
+      filterConditions.orderNo = orderNo;
+    }
+
+    if (coinId) {
+      filterConditions['ad.coinId'] = coinId;
+    }
+
+    if (currencyId) {
+      filterConditions['ad.currency'] = currencyId;
+    }
+
+    if (dateRange) {
+      filterConditions.createdAt = {
+        $gte: dateRange.fromDate,
+        $lte: dateRange.toDate,
+      };
+    }
+
+    const total = await this.orderModel.countDocuments(filterConditions);
+
+    const totalPages = Math.ceil(total / limit);
+
+    const orders = await this.orderModel
       .find(filterConditions)
       .populate({
         path: 'ad',
@@ -91,6 +124,14 @@ export class OrderService {
       .limit(limit)
       .skip(skip)
       .exec();
+
+    // Return the paginated response object
+    return {
+      orders,
+      currentPage: page,
+      totalPages,
+      total,
+    };
   }
 
   async update(id: string, updateOrderDto: any): Promise<Order> {

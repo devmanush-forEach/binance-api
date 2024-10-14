@@ -26,7 +26,14 @@ export class Order {
 
   @Prop({
     required: true,
-    enum: ['pending', 'processing', 'completed', 'canceled'],
+    enum: [
+      'pending',
+      'processing',
+      'paid',
+      'successful',
+      'completed',
+      'canceled',
+    ],
     default: 'pending',
   })
   status: string;
