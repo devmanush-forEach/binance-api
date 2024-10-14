@@ -14,7 +14,7 @@ import {
 import { UserService } from './user.service';
 import { User } from './user.schema';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
-import { GetUsersDto } from './dto/user.dto';
+import { GetUsersDto, UpdateUserDto } from './dto/user.dto';
 import { PaymentServicesService } from './payment-services/payment-services.service';
 import {
   CreatePaymentServicesDto,
@@ -61,9 +61,9 @@ export class UserController {
   // @UseGuards(JwtAuthGuard)
   async updateUser(
     @Param('id') id: string,
-    @Body() updateData: Partial<User>,
+    @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    return this.userService.updateUser(id, updateData);
+    return this.userService.updateUser(id, updateUserDto);
   }
 
   @Post('payment-service')

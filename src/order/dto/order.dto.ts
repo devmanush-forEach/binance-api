@@ -7,6 +7,8 @@ import {
   Min,
   IsDate,
   IsNumber,
+  IsNotEmpty,
+  IsMongoId,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Order } from '../order.schema';
@@ -15,6 +17,68 @@ import { Order } from '../order.schema';
 enum OrderType {
   BUY = 'buy',
   SELL = 'sell',
+}
+export class CreateOrderDto {
+  @IsNotEmpty()
+  @IsNumber()
+  amount: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
+
+  @IsOptional()
+  @IsString()
+  cancelReason?: string;
+
+  @IsNotEmpty()
+  @IsEnum(['buy', 'sell'])
+  type: 'buy' | 'sell';
+
+  @IsOptional()
+  @IsEnum([
+    'pending',
+    'processing',
+    'paid',
+    'successful',
+    'completed',
+    'canceled',
+  ])
+  status?:
+    | 'pending'
+    | 'processing'
+    | 'paid'
+    | 'successful'
+    | 'completed'
+    | 'canceled' = 'pending';
+
+  @IsNotEmpty()
+  @IsMongoId()
+  ad: string;
+
+  @IsNotEmpty()
+  @IsMongoId()
+  advertiser: string;
+
+  @IsNotEmpty()
+  @IsMongoId()
+  coin: string;
+
+  @IsNotEmpty()
+  @IsMongoId()
+  currency: string;
+
+  @IsOptional()
+  @IsMongoId()
+  transactionMethod?: string;
+
+  @IsOptional()
+  @IsMongoId()
+  paymentService?: string;
+
+  @IsNotEmpty()
+  @IsMongoId()
+  user: string;
 }
 
 export class DateRangeDTO {

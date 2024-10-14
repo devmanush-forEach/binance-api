@@ -10,11 +10,13 @@ import { BankDetailsModule } from 'src/bank-details/bank-details.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { TransactionMethodsModule } from 'src/transactions-methods/transaction-methods.module';
 import { PaymentServicesModule } from './payment-services/payment-service.module';
+import { UserBadgeModule } from './user-badge/user-badge.module';
 
 @Module({
   imports: [
     WalletModule,
     UPIDetailsModule,
+    UserBadgeModule,
     BankDetailsModule,
     TransactionMethodsModule,
     PaymentServicesModule,

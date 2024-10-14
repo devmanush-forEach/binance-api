@@ -22,7 +22,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getResponse()
         : 'Internal server error';
 
-    this.logger.error(`Exception thrown: ${message}`);
+    this.logger.error(`Exception thrown: ${JSON.stringify(message)}`);
 
     response.status(status).json({
       statusCode: status,

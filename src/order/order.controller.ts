@@ -14,18 +14,26 @@ import {
 import { OrderService } from './order.service';
 import { Order } from './order.schema';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
-import { OrderFilterDTO, OrderResponse } from './dto/order.dto';
+import { CreateOrderDto, OrderFilterDTO, OrderResponse } from './dto/order.dto';
 
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  create(@Body() createOrderDto: any): Promise<Order> {
+  create(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
     return this.orderService.create(createOrderDto);
   }
 
-  @Get('user')
+  @Get('/by-user')
+  @UseGuards(JwtAuthGuard)
+  findAllByUser(
+    @Param('userId') userId: string,
+    @Query() filters: OrderFilterDTO,
+  ): Promise<OrderResponse> {
+    return this.orderService.findAllByUser(userId, filters);
+  }
+  @Get('/for-user')
   @UseGuards(JwtAuthGuard)
   findAllForUser(
     @Param('userId') userId: string,

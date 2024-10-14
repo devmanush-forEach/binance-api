@@ -36,14 +36,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   async handleMessage(
     client: Socket,
-    payload: { sender: string; recipient: string; content: string },
+    payload: {
+      sender: string;
+      recipient: string;
+      orderId: string;
+      content: string;
+    },
   ) {
-    const { sender, recipient, content } = payload;
+    const { sender, recipient, content, orderId } = payload;
 
     const message = await this.chatService.createMessage(
       sender,
       recipient,
       content,
+      orderId,
     );
 
     this.server.to(recipient).emit('receiveMessage', message);
@@ -53,10 +59,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('getMessages')
   async handleGetMessages(
     client: Socket,
-    payload: { sender: string; recipient: string },
+    payload: { sender: string; recipient: string; orderId: string },
   ) {
-    const { sender, recipient } = payload;
-    const messages = await this.chatService.getMessages(sender, recipient);
+    const { sender, recipient, orderId } = payload;
+    const messages = await this.chatService.getMessages(
+      sender,
+      recipient,
+      orderId,
+    );
 
     client.emit('messages', messages);
   }

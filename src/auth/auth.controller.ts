@@ -16,6 +16,7 @@ import { UserService } from '../user/user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/user/user.schema';
 import { Request, Response } from 'express';
+import { CreateUserDto, UpdateUserDto } from 'src/user/dto/user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -39,7 +40,7 @@ export class AuthController {
       const { email, userId } =
         await this.authService.validateUserByToken(token);
 
-      const { password, role, createdAt, updatedAt, ...user } =
+      const { password, role, ...user } =
         await this.userService.findUserById(userId);
 
       return res.status(HttpStatus.OK).json({
@@ -55,7 +56,7 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() body: User) {
+  async register(@Body() body: CreateUserDto) {
     return this.userService.createUser(body);
   }
 
@@ -74,7 +75,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('update')
-  async updateAccount(@Req() req, @Body() updateData: Partial<User>) {
-    return this.userService.updateUser(req.user.userId, updateData);
+  async updateAccount(@Req() req, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.updateUser(req.user.userId, updateUserDto);
   }
 }

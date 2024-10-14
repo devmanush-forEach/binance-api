@@ -13,20 +13,35 @@ export class ChatService {
     sender: string,
     recipient: string,
     content: string,
+    orderId: string,
   ): Promise<Message> {
-    const newMessage = new this.messageModel({ sender, recipient, content });
+    const newMessage = new this.messageModel({
+      sender,
+      recipient,
+      content,
+      orderId,
+    });
     return newMessage.save();
   }
 
-  async getMessages(sender: string, recipient: string): Promise<Message[]> {
+  async getMessages(
+    sender: string,
+    recipient: string,
+    orderId: string,
+  ): Promise<Message[]> {
     return this.messageModel
       .find({
-        $or: [
-          { sender, recipient },
-          { sender: recipient, recipient: sender },
+        $and: [
+          {
+            $or: [
+              { sender: sender, recipient: recipient },
+              { sender: recipient, recipient: sender },
+            ],
+          },
+          { orderId: orderId },
         ],
       })
-      .sort({ createdAt: 1 }) // Order by creation time
+      .sort({ createdAt: 1 })
       .exec();
   }
 }

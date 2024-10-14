@@ -8,6 +8,7 @@ import { WalletService } from 'src/wallet/wallet.service';
 import { UPIDetailsService } from 'src/upi-details/upi-details.service';
 import { BankDetailsService } from 'src/bank-details/bank-details.service';
 import { TransactionMethodsService } from 'src/transactions-methods/transaction-methods.service';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -19,10 +20,10 @@ export class UserService {
     private readonly transactionMethodsService: TransactionMethodsService,
   ) {}
 
-  async createUser(user: User): Promise<User> {
+  async createUser(user: CreateUserDto): Promise<User> {
     const { password } = user;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userBody: User = { ...user, password: hashedPassword };
+    const userBody: CreateUserDto = { ...user, password: hashedPassword };
     const newUser = new this.userModel(userBody);
     const userData = await newUser.save();
     const userId = userData._id;
@@ -96,8 +97,11 @@ export class UserService {
     });
   }
 
-  async updateUser(userId: string, updateData: Partial<User>): Promise<User> {
-    const user = await this.userModel.findByIdAndUpdate(userId, updateData, {
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    const user = await this.userModel.findByIdAndUpdate(userId, updateUserDto, {
       new: true,
     });
     if (!user) {
