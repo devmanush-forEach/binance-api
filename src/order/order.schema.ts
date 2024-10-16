@@ -1,12 +1,9 @@
 // src/order/schemas/order.schema.ts
-
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Advertisement } from 'src/advertisement/advertisement.schema';
 import { Coin } from 'src/coin/coin.schema';
-import { CounterService } from 'src/counter/counter.service';
 import { Currency } from 'src/currency/currency.schema';
-import { TransactionMethods } from 'src/transactions-methods/transaction-methods.schema';
 import { PaymentServices } from 'src/user/payment-services/payment-services.schema';
 import { User } from 'src/user/user.schema';
 
@@ -26,8 +23,25 @@ export class Order {
   @Prop({ required: true, unique: true })
   orderNo: number;
 
-  @Prop({ required: false })
-  cancelReason: string;
+  @Prop({
+    type: {
+      cancelledBy: { type: String, enum: ['buyer', 'seller', 'system'] },
+      reason: { type: String },
+      refundStatus: {
+        type: String,
+        enum: ['not_refunded', 'refunded'],
+        default: 'not_refunded',
+      },
+      cancelledAt: { type: Date },
+    },
+    required: false,
+  })
+  cancellationDetails: {
+    cancelledBy: string;
+    reason: string;
+    refundStatus: string;
+    cancelledAt: Date;
+  };
 
   @Prop({ required: true, enum: ['buy', 'sell'] })
   type: string;

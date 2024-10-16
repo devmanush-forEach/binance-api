@@ -145,3 +145,17 @@ export interface OrderResponse {
   totalPages: number;
   total: number;
 }
+
+export class CancelOrderDto {
+  @IsEnum(['buyer', 'seller', 'system'])
+  @IsNotEmpty()
+  cancelledBy: string;
+
+  @IsString()
+  @IsNotEmpty()
+  reason: string;
+
+  @IsEnum(['not_refunded', 'refunded'])
+  @IsOptional()
+  refundStatus?: string = 'not_refunded';
+}

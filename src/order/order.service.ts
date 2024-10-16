@@ -4,7 +4,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order, OrderDocument } from './order.schema';
-import { CreateOrderDto, OrderFilterDTO, OrderResponse } from './dto/order.dto';
+import {
+  CancelOrderDto,
+  CreateOrderDto,
+  OrderFilterDTO,
+  OrderResponse,
+} from './dto/order.dto';
 import { CounterService } from 'src/counter/counter.service';
 
 @Injectable()
@@ -210,6 +215,28 @@ export class OrderService {
       totalPages,
       total,
     };
+  }
+
+  async cancelOrder(
+    orderId: string,
+    cancelOrderDto: CancelOrderDto,
+  ): Promise<Order> {
+    const order = await this.orderModel.findById(orderId);
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Update the order status to canceled and store cancellation details
+    order.status = 'canceled';
+    order.cancellationDetails = {
+      cancelledBy: cancelOrderDto.cancelledBy,
+      reason: cancelOrderDto.reason,
+      refundStatus: cancelOrderDto.refundStatus || 'not_refunded',
+      cancelledAt: new Date(),
+    };
+
+    return order.save();
   }
 
   async update(id: string, updateOrderDto: any): Promise<Order> {

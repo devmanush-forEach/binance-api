@@ -20,6 +20,8 @@ import { NetworkModule } from './network/network.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CountryModule } from './country/country.module';
 import { CounterModule } from './counter/counter.module';
+import awsConfig from './config/aws.config';
+import { AwsModule } from './aws/aws.module';
 
 @Module({
   imports: [
@@ -29,6 +31,10 @@ import { CounterModule } from './counter/counter.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [awsConfig],
     }),
     AuthModule,
     UserModule,
@@ -47,6 +53,7 @@ import { CounterModule } from './counter/counter.module';
     NotificationsModule,
     CountryModule,
     CounterModule,
+    AwsModule,
     // OTPModule
   ],
   controllers: [AppController],

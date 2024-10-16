@@ -14,7 +14,12 @@ import {
 import { OrderService } from './order.service';
 import { Order } from './order.schema';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
-import { CreateOrderDto, OrderFilterDTO, OrderResponse } from './dto/order.dto';
+import {
+  CancelOrderDto,
+  CreateOrderDto,
+  OrderFilterDTO,
+  OrderResponse,
+} from './dto/order.dto';
 
 @Controller('orders')
 export class OrderController {
@@ -50,6 +55,14 @@ export class OrderController {
   @Get()
   findAll(): Promise<Order[]> {
     return this.orderService.findAll();
+  }
+
+  @Patch(':id/cancel')
+  cancelOrder(
+    @Param('id') orderId: string,
+    @Body() cancelOrderDto: CancelOrderDto,
+  ): Promise<Order> {
+    return this.orderService.cancelOrder(orderId, cancelOrderDto);
   }
 
   @Patch(':id')
