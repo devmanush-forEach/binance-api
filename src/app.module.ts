@@ -19,6 +19,7 @@ import { ChatModule } from './chat/chat.module';
 import { NetworkModule } from './network/network.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CountryModule } from './country/country.module';
+import { CounterModule } from './counter/counter.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { CountryModule } from './country/country.module';
     NetworkModule,
     NotificationsModule,
     CountryModule,
+    CounterModule,
     // OTPModule
   ],
   controllers: [AppController],
