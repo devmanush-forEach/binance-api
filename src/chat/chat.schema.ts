@@ -20,6 +20,15 @@ export class Message extends Document {
 
   @Prop({ default: Date.now })
   createdAt: Date;
+
+  @Prop({
+    enum: ['delivered', 'seen', 'pending', 'deleted'],
+    default: 'pending',
+  })
+  status: 'delivered' | 'seen' | 'pending' | 'deleted';
+
+  @Prop({ required: false })
+  fileUrl?: string;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

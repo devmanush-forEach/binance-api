@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
+import { AwsService } from 'src/aws/aws.service';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -17,7 +18,10 @@ import { ChatService } from './chat.service';
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly awsService: AwsService,
+  ) {}
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id}`);
@@ -40,20 +44,54 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       sender: string;
       recipient: string;
       orderId: string;
-      content: string;
+      content?: string;
+      image?: any;
     },
   ) {
-    const { sender, recipient, content, orderId } = payload;
+    const { sender, recipient, content, orderId, image } = payload;
 
-    const message = await this.chatService.createMessage(
+    let messageData = {
       sender,
       recipient,
-      content,
       orderId,
-    );
+      content: content || '',
+      fileUrl: undefined,
+    };
 
-    this.server.to(recipient).emit('receiveMessage', message);
-    this.server.to(sender).emit('receiveMessage', message);
+    if (content && image) {
+      try {
+        messageData.fileUrl = await this.awsService.uploadFile(image);
+        messageData.content = content;
+
+        const message = await this.chatService.createMessage(messageData);
+        this.server.to(recipient).emit('receiveMessage', message);
+        this.server.to(sender).emit('receiveMessage', message);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        client.emit('uploadError', { error: 'Image upload failed.' });
+        return;
+      }
+    } else if (content) {
+      const message = await this.chatService.createMessage(messageData);
+      this.server.to(recipient).emit('receiveMessage', message);
+      this.server.to(sender).emit('receiveMessage', message);
+    } else if (image) {
+      try {
+        messageData.fileUrl = await this.awsService.uploadFile(image);
+        messageData.content = '';
+
+        const message = await this.chatService.createMessage(messageData);
+        this.server.to(recipient).emit('receiveMessage', message);
+        this.server.to(sender).emit('receiveMessage', message);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        client.emit('uploadError', { error: 'Image upload failed.' });
+        return;
+      }
+    } else {
+      client.emit('error', { error: 'No content or image provided.' });
+      return;
+    }
   }
 
   @SubscribeMessage('getMessages')

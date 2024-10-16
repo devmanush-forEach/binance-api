@@ -41,15 +41,10 @@ export class AwsController {
   async uploadImage(
     @UploadedFile() file: any,
     @Body() uploadImageDto: UploadImageDto,
-  ): Promise<{ imageUrl: string }> {
+  ): Promise<{ url: string }> {
     if (!file) {
       throw new BadRequestException('File is not provided');
     }
-
-    const imageUrl = await this.awsService.uploadImage(file);
-
-    // Optionally, handle uploadImageDto (title, description) here or store metadata as needed
-
-    return { imageUrl };
+    return await this.awsService.uploadFile(file);
   }
 }

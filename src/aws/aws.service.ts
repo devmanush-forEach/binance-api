@@ -41,7 +41,7 @@ export class AwsService {
    * @param file The file object to upload.
    * @returns The URL of the uploaded image.
    */
-  async uploadImage(file: any): Promise<string> {
+  async uploadFile(file: any): Promise<{ url: string }> {
     const fileExtension = file.originalname.split('.').pop();
     const uniqueFileName = `${uuidv4()}.${fileExtension}`;
 
@@ -58,7 +58,7 @@ export class AwsService {
       this.logger.log(
         `File uploaded successfully. Location: ${uploadResult.Location}`,
       );
-      return uploadResult.Location;
+      return { url: uploadResult.Location };
     } catch (error) {
       this.logger.error('Error uploading file to S3', error.stack);
       throw error;
