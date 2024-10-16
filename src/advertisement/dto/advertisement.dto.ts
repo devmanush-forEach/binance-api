@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsBoolean,
+  IsDate,
   IsEnum,
   IsMongoId,
   IsNotEmpty,
@@ -112,6 +113,18 @@ export class UpdateAdvertisementDto extends PartialType(
   CreateAdvertisementDto,
 ) {}
 
+class DateRange {
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  fromDate?: Date | null;
+
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  toDate?: Date | null;
+}
+
 export class GetAdvertisementsDto {
   @IsOptional()
   @IsString()
@@ -132,6 +145,15 @@ export class GetAdvertisementsDto {
   @IsOptional()
   @Min(10)
   limit?: number = 10;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DateRange)
+  dateRange?: DateRange;
+
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
 }
 
 export class SearchAdvertisementsDto {
@@ -154,4 +176,13 @@ export class SearchAdvertisementsDto {
   @IsOptional()
   @Min(10)
   limit?: number = 10;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DateRange)
+  dateRange?: DateRange;
+
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
 }

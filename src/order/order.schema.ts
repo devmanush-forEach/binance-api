@@ -55,11 +55,11 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: Coin.name, required: true })
   coin: Types.ObjectId;
 
+  @Prop({ type: Number, required: true })
+  atPrice: number;
+
   @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
   currency: Types.ObjectId;
-
-  @Prop({ type: Types.ObjectId, ref: TransactionMethods.name, required: false })
-  transactionMethod: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: PaymentServices.name, required: false })
   paymentService: Types.ObjectId;
