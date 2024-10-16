@@ -26,25 +26,19 @@ export class OrderService {
       .findById(id)
       .populate([
         {
-          path: 'ad',
+          path: 'paymentService',
           populate: [
             {
-              path: 'coinId',
-              model: 'Coin',
-            },
-            {
-              path: 'currency',
-              model: 'Currency',
-            },
-            {
-              path: 'userId',
-              model: 'User',
+              path: 'transactionMethodId',
+              model: 'TransactionMethods',
             },
           ],
         },
         'user',
-        'transactionMethod',
-        'paymentService',
+        'ad',
+        'coin',
+        'advertiser',
+        'currency',
       ])
       .exec();
     if (!order) {
@@ -206,7 +200,6 @@ export class OrderService {
       .skip(skip)
       .exec();
 
-    // Return the paginated response object
     return {
       orders,
       currentPage: page,
