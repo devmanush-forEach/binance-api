@@ -16,7 +16,6 @@ export class CurrencyController {
 
   @Post()
   create(@Body() createCurrencyDto: CreateCurrencyDto) {
-    console.log('11111111111111111111111111111111111111');
     return this.currencyService.create(createCurrencyDto);
   }
 

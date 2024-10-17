@@ -66,15 +66,19 @@ export class AdvertisementService {
 
   async searchAdvertisements(
     filters: {
+      requestUserId: string;
       userId?: string;
       adType?: string;
       coinId?: string;
+      currency?: string;
+      priceRange?: number;
+      paymentMethods?: string[];
     },
     page: number = 1,
     limit: number = 10,
   ): Promise<any> {
     const queryFilter: any = {};
-
+    const requestUserId = filters.requestUserId;
     if (filters.adType) {
       queryFilter.adType = filters.adType;
     }
@@ -82,10 +86,104 @@ export class AdvertisementService {
       queryFilter.coinId = filters.coinId;
     }
 
+    if (filters.currency && filters.currency.trim() !== '') {
+      queryFilter.currency = filters.currency;
+    }
+
+    if (filters?.priceRange && filters?.priceRange > 0) {
+      queryFilter.transactionLimitMin = { $lte: filters?.priceRange };
+      queryFilter.transactionLimitMax = { $gte: filters?.priceRange };
+    }
+
     const skip = (page - 1) * limit;
 
     const query = this.advertisementModel
-      .find(queryFilter)
+      .find({ ...queryFilter, isOnline: true, userId: { $ne: requestUserId } })
+      .populate([
+        'paymentMethods',
+        {
+          path: 'paymentMethods',
+          populate: {
+            path: 'transactionMethodId',
+            model: 'TransactionMethods',
+          },
+        },
+        'transactionMethods',
+        'currency',
+        'coinId',
+        {
+          path: 'userId',
+          select: 'username email',
+        },
+      ])
+      .skip(skip)
+      .limit(limit)
+      .lean()
+      .exec();
+
+    const [ads, total] = await Promise.all([
+      query,
+      this.advertisementModel.countDocuments(queryFilter),
+    ]);
+
+    let advertisements = [];
+
+    for (let ad of ads) {
+      const userId = ad.userId._id.toString();
+      const coinId = ad.coinId._id.toString();
+      const walletValue = await this.walletService.getCoinBalanceByUserId(
+        userId,
+        coinId,
+      );
+      if (ad.adType === 'sell' && walletValue?.balance < 1) {
+      } else {
+        advertisements.push({
+          ...ad,
+          availableCoin: walletValue?.balance || 0,
+        });
+      }
+    }
+    const response = {
+      advertisements,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
+
+    return response;
+  }
+  async findAllAdsForUser(
+    filters: {
+      requestUserId: string;
+      adType?: string;
+      coinId?: string;
+      status?: 'online' | 'offline';
+    },
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<any> {
+    const queryFilter: any = {};
+    const requestUserId = filters.requestUserId;
+    if (filters.adType) {
+      queryFilter.adType = filters.adType;
+    }
+    if (filters.coinId && filters.coinId.trim() !== '') {
+      queryFilter.coinId = filters.coinId;
+    }
+
+    // if (filters.currency && filters.currency.trim() !== '') {
+    //   queryFilter.currency = filters.currency;
+    // }
+
+    // if (filters?.priceRange && filters?.priceRange > 0) {
+    //   queryFilter.transactionLimitMin = { $lte: filters?.priceRange };
+    //   queryFilter.transactionLimitMax = { $gte: filters?.priceRange };
+    // }
+
+    const skip = (page - 1) * limit;
+
+    const query = this.advertisementModel
+      .find({ ...queryFilter, userId: { $eq: requestUserId } })
       .populate([
         'paymentMethods',
         {
@@ -151,8 +249,6 @@ export class AdvertisementService {
   async findOne(id: string): Promise<Advertisement> {
     const advertisement = await this.advertisementModel
       .findById(id)
-      .populate('paymentMethod')
-      .populate('currency')
       .populate('coinId')
       .exec();
     if (!advertisement) {

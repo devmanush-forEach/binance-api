@@ -11,19 +11,53 @@ import {
   OrderResponse,
 } from './dto/order.dto';
 import { CounterService } from 'src/counter/counter.service';
+import { AdvertisementService } from 'src/advertisement/advertisement.service';
+import {
+  convertToProvidedCurrency,
+  getPercentValue,
+} from 'src/helpers/calculate.helpers';
+import { Coin } from 'src/coin/coin.schema';
+import { CoinService } from 'src/coin/coin.service';
+import { CurrencyService } from 'src/currency/currency.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     private readonly counterService: CounterService,
+    private readonly advertisementService: AdvertisementService,
+    private readonly coinService: CoinService,
+    private readonly currencyService: CurrencyService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
     const orderNo = await this.counterService.getNextOrderNo();
     if (!orderNo) throw new Error('No Order No. present');
-    const createdOrder = new this.orderModel({ ...createOrderDto, orderNo });
-    return createdOrder.save();
+    const ad = await this.advertisementService.findOne(createOrderDto.ad);
+    const coin: any = ad.coinId;
+    let coinRate: number = ad.transactionPrice;
+    if (ad.isDynamicPrice) {
+      const percentValue = getPercentValue(coin.price, ad.pricePercent);
+      const fromCurrency = await this.currencyService.findOne(coin.currency);
+      const toCurrency = await this.currencyService.findOne(
+        createOrderDto.currency,
+      );
+      coinRate = convertToProvidedCurrency(
+        percentValue,
+        fromCurrency,
+        toCurrency,
+      );
+    }
+    try {
+      const createdOrder = new this.orderModel({
+        ...createOrderDto,
+        orderNo,
+        coinPrice: coinRate,
+      });
+      return createdOrder.save();
+    } catch (error) {
+      console.log(JSON.stringify(error));
+    }
   }
 
   async findAll(): Promise<Order[]> {

@@ -41,7 +41,7 @@ export class AwsService {
    * @param file The file object to upload.
    * @returns The URL of the uploaded image.
    */
-  async uploadFile(file: any): Promise<{ url: string }> {
+  async uploadImage(file: any): Promise<{ url: string }> {
     const fileExtension = file.originalname.split('.').pop();
     const uniqueFileName = `${uuidv4()}.${fileExtension}`;
 
@@ -50,6 +50,39 @@ export class AwsService {
       Key: uniqueFileName,
       Body: file.buffer,
       ContentType: file.mimetype,
+      ACL: 'public-read',
+    };
+
+    try {
+      const uploadResult = await this.s3.upload(params).promise();
+      this.logger.log(
+        `File uploaded successfully. Location: ${uploadResult.Location}`,
+      );
+      return { url: uploadResult.Location };
+    } catch (error) {
+      this.logger.error('Error uploading file to S3', error.stack);
+      throw error;
+    }
+  }
+
+  async uploadFile(file: {
+    buffer: ArrayBuffer;
+    mimetype: string;
+    originalname: string;
+  }): Promise<{ url: string }> {
+    const fileExtension = file.originalname?.split('.').pop();
+    const uniqueFileName = `${uuidv4()}.${fileExtension}`;
+
+    // Convert ArrayBuffer to Buffer
+    const fileBuffer = Buffer.isBuffer(file.buffer)
+      ? file.buffer
+      : Buffer.from(file.buffer);
+
+    const params: AWS.S3.PutObjectRequest = {
+      Bucket: this.bucketName,
+      Key: uniqueFileName,
+      Body: fileBuffer,
+      ContentType: file.mimetype, // Use the correct MIME type
       ACL: 'public-read',
     };
 

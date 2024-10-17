@@ -16,5 +16,6 @@ import { WalletModule } from 'src/wallet/wallet.module';
   ],
   controllers: [AdvertisementController],
   providers: [AdvertisementService],
+  exports: [AdvertisementService],
 })
 export class AdvertisementModule {}

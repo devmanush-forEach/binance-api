@@ -132,6 +132,10 @@ export class GetAdvertisementsDto {
 
   @IsOptional()
   @IsString()
+  status?: 'online' | 'offline';
+
+  @IsOptional()
+  @IsString()
   adType?: string;
 
   @IsOptional()
@@ -165,9 +169,22 @@ export class SearchAdvertisementsDto {
   @IsString()
   adType?: string;
 
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  paymentMethods?: string[];
+
   @IsOptional()
   @IsString()
   coinId?: string;
+
+  @IsOptional()
+  @IsString()
+  currency?: string;
+
+  @IsOptional()
+  @IsNumber()
+  priceRange?: number;
 
   @IsOptional()
   @Min(1)

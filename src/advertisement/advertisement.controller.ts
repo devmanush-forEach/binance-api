@@ -16,7 +16,6 @@ import {
   SearchAdvertisementsDto,
   UpdateAdvertisementDto,
 } from './dto/advertisement.dto';
-import { Advertisement } from './advertisement.schema';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
 
 @Controller('advertisements')
@@ -37,10 +36,26 @@ export class AdvertisementController {
   @UseGuards(JwtAuthGuard)
   async searchAdvertisements(
     @Query() query: SearchAdvertisementsDto,
+    @Param() params: any,
   ): Promise<any> {
-    const { adType, coinId, page, limit } = query;
+    const {
+      adType,
+      coinId,
+      currency,
+      page,
+      limit,
+      paymentMethods,
+      priceRange,
+    } = query;
     return this.advertisementService.searchAdvertisements(
-      { adType, coinId },
+      {
+        adType,
+        coinId,
+        currency,
+        paymentMethods,
+        requestUserId: params.userId,
+        priceRange,
+      },
       page,
       limit,
     );
@@ -52,9 +67,9 @@ export class AdvertisementController {
     @Param('userId') userId: string,
     @Query() query: GetAdvertisementsDto,
   ) {
-    const { adType, coinId, page, limit } = query;
-    return this.advertisementService.searchAdvertisements(
-      { userId, adType, coinId },
+    const { adType, coinId, page, limit, status } = query;
+    return this.advertisementService.findAllAdsForUser(
+      { adType, coinId, requestUserId: userId, status },
       page,
       limit,
     );

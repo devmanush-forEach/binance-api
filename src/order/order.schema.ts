@@ -70,7 +70,7 @@ export class Order {
   coin: Types.ObjectId;
 
   @Prop({ type: Number, required: true })
-  atPrice: number;
+  coinPrice: number;
 
   @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
   currency: Types.ObjectId;
