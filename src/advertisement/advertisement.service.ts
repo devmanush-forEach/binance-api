@@ -7,6 +7,7 @@ import {
   UpdateAdvertisementDto,
 } from './dto/advertisement.dto';
 import { WalletService } from 'src/wallet/wallet.service';
+import { DateRange } from 'src/advertisement/dto/advertisement.dto';
 
 @Injectable()
 export class AdvertisementService {
@@ -73,12 +74,20 @@ export class AdvertisementService {
       currency?: string;
       priceRange?: number;
       paymentMethods?: string[];
+      region?: string;
     },
     page: number = 1,
     limit: number = 10,
   ): Promise<any> {
     const queryFilter: any = {};
     const requestUserId = filters.requestUserId;
+
+    if (filters.adType === 'sell') {
+      queryFilter['paymentMethods'] = { $exists: true, $ne: [] };
+    } else if (filters.adType === 'buy') {
+      queryFilter['transactionMethods'] = { $exists: true, $ne: [] };
+    }
+
     if (filters.adType) {
       queryFilter.adType = filters.adType;
     }
@@ -93,6 +102,18 @@ export class AdvertisementService {
     if (filters?.priceRange && filters?.priceRange > 0) {
       queryFilter.transactionLimitMin = { $lte: filters?.priceRange };
       queryFilter.transactionLimitMax = { $gte: filters?.priceRange };
+    }
+
+    if (filters?.paymentMethods && filters?.paymentMethods.length) {
+      queryFilter.transactionMethods = {
+        $elemMatch: { $in: filters.paymentMethods },
+      };
+    }
+    if (filters?.region && filters.region.trim() !== '') {
+      queryFilter.$or = [
+        { allRegions: true },
+        { regions: { $in: [filters.region] } },
+      ];
     }
 
     const skip = (page - 1) * limit;
@@ -158,6 +179,7 @@ export class AdvertisementService {
       adType?: string;
       coinId?: string;
       status?: 'online' | 'offline';
+      dateRange?: DateRange;
     },
     page: number = 1,
     limit: number = 10,
@@ -171,14 +193,16 @@ export class AdvertisementService {
       queryFilter.coinId = filters.coinId;
     }
 
-    // if (filters.currency && filters.currency.trim() !== '') {
-    //   queryFilter.currency = filters.currency;
-    // }
-
-    // if (filters?.priceRange && filters?.priceRange > 0) {
-    //   queryFilter.transactionLimitMin = { $lte: filters?.priceRange };
-    //   queryFilter.transactionLimitMax = { $gte: filters?.priceRange };
-    // }
+    if (
+      filters.dateRange &&
+      filters.dateRange.fromDate &&
+      filters.dateRange.toDate
+    ) {
+      queryFilter.createdAt = {
+        $gte: new Date(filters.dateRange.fromDate),
+        $lte: new Date(filters.dateRange.toDate),
+      };
+    }
 
     const skip = (page - 1) * limit;
 

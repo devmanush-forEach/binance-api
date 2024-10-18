@@ -99,6 +99,10 @@ export class CreateAdvertisementDto {
   @IsOptional()
   regions?: Types.ObjectId[];
 
+  @IsBoolean()
+  @IsNotEmpty()
+  allRegions: boolean;
+
   @IsMongoId()
   @IsNotEmpty()
   coinId: Types.ObjectId;
@@ -113,7 +117,7 @@ export class UpdateAdvertisementDto extends PartialType(
   CreateAdvertisementDto,
 ) {}
 
-class DateRange {
+export class DateRange {
   @IsOptional()
   @IsDate()
   @Type(() => Date)
@@ -181,6 +185,10 @@ export class SearchAdvertisementsDto {
   @IsOptional()
   @IsString()
   currency?: string;
+
+  @IsOptional()
+  @IsString()
+  region?: string;
 
   @IsOptional()
   @IsNumber()

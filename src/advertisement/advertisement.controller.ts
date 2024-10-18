@@ -46,6 +46,7 @@ export class AdvertisementController {
       limit,
       paymentMethods,
       priceRange,
+      region,
     } = query;
     return this.advertisementService.searchAdvertisements(
       {
@@ -55,6 +56,7 @@ export class AdvertisementController {
         paymentMethods,
         requestUserId: params.userId,
         priceRange,
+        region,
       },
       page,
       limit,
@@ -67,9 +69,9 @@ export class AdvertisementController {
     @Param('userId') userId: string,
     @Query() query: GetAdvertisementsDto,
   ) {
-    const { adType, coinId, page, limit, status } = query;
+    const { adType, coinId, page, limit, status, dateRange } = query;
     return this.advertisementService.findAllAdsForUser(
-      { adType, coinId, requestUserId: userId, status },
+      { adType, coinId, requestUserId: userId, status, dateRange },
       page,
       limit,
     );

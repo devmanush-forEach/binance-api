@@ -218,7 +218,7 @@ export class TransactionService {
       const transactionAmount = transaction.amount;
 
       const wallet = await this.walletModel.findOne({
-        userId: '66e18fc127b215d986ed4a0a',
+        userId,
       });
 
       if (transaction.status !== 'pending') {
