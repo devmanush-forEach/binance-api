@@ -122,6 +122,81 @@ export class TransactionService {
       total,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
+    };
+  }
+  async searchAdminTransactions(filters: SearchTransactionsDto): Promise<any> {
+    const query: any = {};
+
+    if (filters.user) {
+      query.user = filters.user;
+    }
+
+    if (filters.coin) {
+      query.coin = filters.coin;
+    }
+
+    if (filters.transactionType) {
+      query.transactionType = filters.transactionType;
+    }
+
+    if (filters.status) {
+      query.status = filters.status;
+    }
+
+    if (filters.network) {
+      query.network = filters.network;
+    }
+
+    if (filters.transactionId) {
+      query.transactionId = filters.transactionId;
+    }
+
+    if (filters.withdrawAddress) {
+      query.withdrawAddress = filters.withdrawAddress;
+    }
+
+    if (filters.depositAddress) {
+      query.depositAddress = filters.depositAddress;
+    }
+
+    const page = filters.page || 1;
+    const limit = filters.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const [results, total, statusCounts] = await Promise.all([
+      this.transactionModel
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .populate(['coin', 'user', 'network'])
+        .exec(),
+      this.transactionModel.countDocuments(query),
+      this.transactionModel.aggregate([
+        {
+          $match: {
+            ...query,
+            status: { $in: ['completed', 'failed', 'pending'] },
+          },
+        },
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    const statusCountsFormatted = statusCounts.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    return {
+      transactions: results,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
       pending: statusCountsFormatted?.pending || 0,
       completed: statusCountsFormatted?.completed || 0,
       failed: statusCountsFormatted?.failed || 0,

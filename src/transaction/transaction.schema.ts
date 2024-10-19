@@ -37,7 +37,7 @@ export class Transaction {
 
   @Prop({
     required: true,
-    enum: ['pending', 'completed', 'failed'],
+    enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending',
   })
   status: string;

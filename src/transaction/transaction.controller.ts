@@ -30,10 +30,22 @@ export class TransactionController {
   }
 
   @Get('/search')
+  @UseGuards(JwtAuthGuard)
   searchTransactions(
+    @Param('userId') userId: string,
     @Query() filters: SearchTransactionsDto,
   ): Promise<Transaction[]> {
-    return this.transactionService.searchTransactions(filters);
+    return this.transactionService.searchTransactions({
+      ...filters,
+      user: userId,
+    });
+  }
+
+  @Get('/admin/search')
+  searchAdmionTransactions(
+    @Query() filters: SearchTransactionsDto,
+  ): Promise<Transaction[]> {
+    return this.transactionService.searchAdminTransactions(filters);
   }
 
   @Get()

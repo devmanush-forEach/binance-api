@@ -5,7 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './exception.filter';
 
 async function bootstrap() {
-  const PORT = process.env.PORT || 3003;
+  const PORT = process.env.PORT || 3004;
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   app.useGlobalFilters(new AllExceptionsFilter());
