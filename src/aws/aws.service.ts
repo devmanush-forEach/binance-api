@@ -97,4 +97,20 @@ export class AwsService {
       throw error;
     }
   }
+
+  async uploadImages(files: Express.Multer.File[]): Promise<string[]> {
+    const uploadPromises = [];
+
+    for (const file of files) {
+      const result = this.uploadFile({
+        buffer: file.buffer,
+        mimetype: file.mimetype,
+        originalname: file.originalname,
+      });
+      uploadPromises.push(result);
+    }
+
+    const uploadResults = await Promise.all(uploadPromises);
+    return uploadResults.map((result) => result.url);
+  }
 }

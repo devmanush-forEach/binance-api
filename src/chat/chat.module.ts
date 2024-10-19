@@ -13,5 +13,6 @@ import { AwsModule } from 'src/aws/aws.module';
   ],
   providers: [ChatService, ChatGateway],
   controllers: [ChatController],
+  exports: [ChatService],
 })
 export class ChatModule {}

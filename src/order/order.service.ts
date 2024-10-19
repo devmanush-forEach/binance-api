@@ -19,6 +19,7 @@ import {
 import { Coin } from 'src/coin/coin.schema';
 import { CoinService } from 'src/coin/coin.service';
 import { CurrencyService } from 'src/currency/currency.service';
+import { ChatService } from 'src/chat/chat.service';
 
 @Injectable()
 export class OrderService {
@@ -28,6 +29,7 @@ export class OrderService {
     private readonly advertisementService: AdvertisementService,
     private readonly coinService: CoinService,
     private readonly currencyService: CurrencyService,
+    private readonly chatService: ChatService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
@@ -48,12 +50,24 @@ export class OrderService {
         toCurrency,
       );
     }
+
     try {
       const createdOrder = new this.orderModel({
         ...createOrderDto,
         orderNo,
         coinPrice: coinRate,
       });
+
+      if (ad.autoReplyMessage && ad.autoReplyMessage.trim() !== '') {
+        let messageData = {
+          sender: createOrderDto.advertiser,
+          recipient: createOrderDto.user,
+          orderId: createdOrder._id.toString(),
+          content: ad.autoReplyMessage,
+          fileUrl: undefined,
+        };
+        const message = await this.chatService.createMessage(messageData);
+      }
       return createdOrder.save();
     } catch (error) {
       console.log(JSON.stringify(error));
@@ -256,12 +270,12 @@ export class OrderService {
     cancelOrderDto: CancelOrderDto,
   ): Promise<Order> {
     const order = await this.orderModel.findById(orderId);
+    console.log('1111111111111111111111');
 
     if (!order) {
       throw new NotFoundException('Order not found');
     }
 
-    // Update the order status to canceled and store cancellation details
     order.status = 'canceled';
     order.cancellationDetails = {
       cancelledBy: cancelOrderDto.cancelledBy,

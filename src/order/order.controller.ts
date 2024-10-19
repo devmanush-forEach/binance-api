@@ -10,6 +10,10 @@ import {
   Delete,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { Order } from './order.schema';
@@ -20,10 +24,44 @@ import {
   OrderFilterDTO,
   OrderResponse,
 } from './dto/order.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { CreateOrderNotificationDto } from './orderNotification/dto/orderNotification.dto';
+import { OrderNotificationService } from './orderNotification/orderNotification.service';
+import { AwsService } from 'src/aws/aws.service';
 
 @Controller('orders')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(
+    private readonly orderService: OrderService,
+    private readonly orderNotificationService: OrderNotificationService,
+    private readonly awsService: AwsService,
+  ) {}
+
+  @Post('/:orderId/notify')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('images', 3))
+  async createOrderNotification(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Param('orderId') orderId: string,
+    @Param('userId') userId: string,
+    @Body() createOrderNotificationDto: CreateOrderNotificationDto,
+  ) {
+    try {
+      const imageUrls = await this.awsService.uploadImages(files);
+      createOrderNotificationDto.images = imageUrls;
+
+      return this.orderNotificationService.createNotification({
+        ...createOrderNotificationDto,
+        orderId,
+        sender: userId,
+      });
+    } catch (error) {
+      throw new HttpException(
+        'Failed to create order notification',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
@@ -57,9 +95,9 @@ export class OrderController {
     return this.orderService.findAll();
   }
 
-  @Patch(':id/cancel')
+  @Patch(':orderId/cancel')
   cancelOrder(
-    @Param('id') orderId: string,
+    @Param('orderId') orderId: string,
     @Body() cancelOrderDto: CancelOrderDto,
   ): Promise<Order> {
     return this.orderService.cancelOrder(orderId, cancelOrderDto);

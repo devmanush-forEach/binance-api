@@ -17,7 +17,7 @@ export enum StatusType {
   SELL = 'offline',
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false })
 export class Advertisement extends Document {
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   userId: Types.ObjectId;
@@ -66,6 +66,9 @@ export class Advertisement extends Document {
 
   @Prop({ type: String })
   transactionRemark: string;
+
+  @Prop({ type: String })
+  autoReplyMessage: string;
 
   @Prop({
     type: [Types.ObjectId],

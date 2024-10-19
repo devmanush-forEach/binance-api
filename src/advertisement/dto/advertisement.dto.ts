@@ -84,6 +84,10 @@ export class CreateAdvertisementDto {
   @IsOptional()
   transactionRemark?: string;
 
+  @IsString()
+  @IsOptional()
+  autoReplyMessage?: string;
+
   @IsArray()
   @IsMongoId({ each: true })
   @IsOptional()
