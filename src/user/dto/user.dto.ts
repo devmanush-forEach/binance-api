@@ -55,10 +55,6 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
   confirmPassword: string;
-
-  @IsOptional()
-  @IsString()
-  role?: Role;
 }
 
 export class UpdateUserDto {
