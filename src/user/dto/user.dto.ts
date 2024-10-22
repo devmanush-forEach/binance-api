@@ -10,6 +10,11 @@ import {
   Min,
 } from 'class-validator';
 
+export enum Role {
+  User = 'user',
+  Admin = 'admin',
+}
+
 export class CreateUserDto {
   @IsNotEmpty()
   @IsEmail()
@@ -53,7 +58,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  role?: string;
+  role?: Role;
 }
 
 export class UpdateUserDto {
@@ -95,7 +100,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  role?: string;
+  role?: Role;
 }
 
 export class GetUsersDto {
