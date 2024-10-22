@@ -22,6 +22,7 @@ import { CountryModule } from './country/country.module';
 import { CounterModule } from './counter/counter.module';
 import awsConfig from './config/aws.config';
 import { AwsModule } from './aws/aws.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { AwsModule } from './aws/aws.module';
     CountryModule,
     CounterModule,
     AwsModule,
+    NotificationModule,
     // OTPModule
   ],
   controllers: [AppController],

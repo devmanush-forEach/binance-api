@@ -14,8 +14,8 @@ export class CreateOrderNotificationDto {
   @IsString()
   sender: string;
 
-  @IsNotEmpty()
-  orderId: string;
+  @IsOptional()
+  orderId?: string;
 
   @IsNotEmpty()
   @IsNumber()

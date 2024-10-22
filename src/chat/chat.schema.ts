@@ -15,8 +15,8 @@ export class Message extends Document {
   @Prop({ type: Types.ObjectId, ref: Order.name, required: true })
   orderId: Types.ObjectId;
 
-  @Prop({ required: true })
-  content: string;
+  @Prop({ required: false })
+  content?: string;
 
   @Prop({ default: Date.now })
   createdAt: Date;

@@ -9,13 +9,12 @@ export class ChatService {
     @InjectModel(Message.name) private messageModel: Model<Message>,
   ) {}
 
-  // Updated method to accept a single object as a parameter
   async createMessage(messageData: {
     sender: string;
     recipient: string;
-    content: string;
+    content?: string;
     orderId: string;
-    fileUrl?: string; // Optional field for file URL
+    fileUrl?: string;
   }): Promise<Message> {
     const newMessage = new this.messageModel(messageData);
     return newMessage.save();

@@ -28,6 +28,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreateOrderNotificationDto } from './orderNotification/dto/orderNotification.dto';
 import { OrderNotificationService } from './orderNotification/orderNotification.service';
 import { AwsService } from 'src/aws/aws.service';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Controller('orders')
 export class OrderController {
@@ -35,9 +36,10 @@ export class OrderController {
     private readonly orderService: OrderService,
     private readonly orderNotificationService: OrderNotificationService,
     private readonly awsService: AwsService,
+    private readonly chatGateway: ChatGateway,
   ) {}
 
-  @Post('/:orderId/notify')
+  @Post(':orderId/notify')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('images', 3))
   async createOrderNotification(
@@ -47,15 +49,31 @@ export class OrderController {
     @Body() createOrderNotificationDto: CreateOrderNotificationDto,
   ) {
     try {
+      // Upload images to S3 using AwsService
       const imageUrls = await this.awsService.uploadImages(files);
+
+      // Add image URLs to the DTO
       createOrderNotificationDto.images = imageUrls;
 
-      return this.orderNotificationService.createNotification({
-        ...createOrderNotificationDto,
+      // Create the order notification
+      const notification =
+        await this.orderNotificationService.createNotification({
+          ...createOrderNotificationDto,
+          orderId,
+          sender: userId,
+        });
+
+      // Call the pushNotification method to notify the recipient
+      this.chatGateway.pushNotification(notification.reciever.toString(), {
+        title: 'Order Notification',
+        message: `You have a new notification for order ${orderId}.`,
         orderId,
-        sender: userId,
       });
+
+      // Return the created notification
+      return notification;
     } catch (error) {
+      console.error('Error creating order notification:', error);
       throw new HttpException(
         'Failed to create order notification',
         HttpStatus.INTERNAL_SERVER_ERROR,

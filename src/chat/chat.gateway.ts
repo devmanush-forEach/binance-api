@@ -23,7 +23,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly awsService: AwsService,
   ) {}
 
+  private userSockets: Map<string, string> = new Map();
+
   handleConnection(client: Socket) {
+    let userId = client.handshake.query.userId;
+    if (typeof userId === 'string') {
+      this.userSockets.set(userId, client.id);
+    }
     console.log(`Client connected: ${client.id}`);
   }
 
@@ -37,63 +43,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client ${client.id} joined room: ${room}`);
   }
 
-  // @SubscribeMessage('sendMessage')
-  // async handleMessage(
-  //   client: Socket,
-  //   payload: {
-  //     sender: string;
-  //     recipient: string;
-  //     orderId: string;
-  //     content?: string;
-  //     image?: any;
-  //   },
-  // ) {
-  //   const { sender, recipient, content, orderId, image } = payload;
-
-  //   let messageData = {
-  //     sender,
-  //     recipient,
-  //     orderId,
-  //     content: content || '',
-  //     fileUrl: undefined,
-  //   };
-
-  //   if (content && image) {
-  //     try {
-  //       messageData.fileUrl = await this.awsService.uploadFile(image);
-  //       messageData.content = content;
-
-  //       const message = await this.chatService.createMessage(messageData);
-  //       this.server.to(recipient).emit('receiveMessage', message);
-  //       this.server.to(sender).emit('receiveMessage', message);
-  //     } catch (error) {
-  //       console.error('Error uploading image:', error);
-  //       client.emit('uploadError', { error: 'Image upload failed.' });
-  //       return;
-  //     }
-  //   } else if (content) {
-  //     const message = await this.chatService.createMessage(messageData);
-  //     this.server.to(recipient).emit('receiveMessage', message);
-  //     this.server.to(sender).emit('receiveMessage', message);
-  //   } else if (image) {
-  //     try {
-  //       messageData.fileUrl = await this.awsService.uploadFile(image);
-  //       messageData.content = '';
-
-  //       const message = await this.chatService.createMessage(messageData);
-  //       this.server.to(recipient).emit('receiveMessage', message);
-  //       this.server.to(sender).emit('receiveMessage', message);
-  //     } catch (error) {
-  //       console.error('Error uploading image:', error);
-  //       client.emit('uploadError', { error: 'Image upload failed.' });
-  //       return;
-  //     }
-  //   } else {
-  //     client.emit('error', { error: 'No content or image provided.' });
-  //     return;
-  //   }
-  // }
-
   @SubscribeMessage('sendMessage')
   async handleMessage(
     client: Socket,
@@ -103,9 +52,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       orderId: string;
       content?: string;
       image?: {
-        buffer: ArrayBuffer; // Expect ArrayBuffer in the image data
-        mimetype: string; // File's mimetype
-        originalname: string; // Original name of the file
+        buffer: ArrayBuffer;
+        mimetype: string;
+        originalname: string;
       };
     },
   ) {
@@ -123,24 +72,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     try {
       if (content && image) {
-        // If content and image are present, handle both
         const { url } = await this.awsService.uploadFile(image);
         messageData.fileUrl = url;
-
         messageData.content = content;
       } else if (content) {
-        // If only content is present, no need to upload file
         messageData.content = content;
       } else if (image) {
-        // If only image is present
-        messageData.fileUrl = await this.awsService.uploadFile(image);
+        const { url } = await this.awsService.uploadFile(image);
+        messageData.fileUrl = url;
         messageData.content = '';
       } else {
         client.emit('error', { error: 'No content or image provided.' });
         return;
       }
 
-      // Create the message in your chat service and emit it to the recipient and sender
       const message = await this.chatService.createMessage(messageData);
       this.server.to(recipient).emit('receiveMessage', message);
       this.server.to(sender).emit('receiveMessage', message);
@@ -163,5 +108,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     client.emit('messages', messages);
+  }
+
+  pushNotification(
+    recipient: string,
+    notification: { title: string; message: string; orderId: string },
+  ) {
+    const recipientSocketId = this.userSockets.get(recipient);
+    if (recipientSocketId) {
+      this.server.to(recipientSocketId).emit('notification', notification);
+      console.log(`Notification sent to recipient: ${recipient}`, notification);
+    } else {
+      console.log(`Recipient not connected: ${recipient}`);
+    }
+    console.log(`Notification sent to recipient: ${recipient}`, notification);
   }
 }

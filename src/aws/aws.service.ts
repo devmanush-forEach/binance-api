@@ -73,7 +73,6 @@ export class AwsService {
     const fileExtension = file.originalname?.split('.').pop();
     const uniqueFileName = `${uuidv4()}.${fileExtension}`;
 
-    // Convert ArrayBuffer to Buffer
     const fileBuffer = Buffer.isBuffer(file.buffer)
       ? file.buffer
       : Buffer.from(file.buffer);
@@ -82,7 +81,7 @@ export class AwsService {
       Bucket: this.bucketName,
       Key: uniqueFileName,
       Body: fileBuffer,
-      ContentType: file.mimetype, // Use the correct MIME type
+      ContentType: file.mimetype,
       ACL: 'public-read',
     };
 
@@ -100,7 +99,6 @@ export class AwsService {
 
   async uploadImages(files: Express.Multer.File[]): Promise<string[]> {
     const uploadPromises = [];
-
     for (const file of files) {
       const result = this.uploadFile({
         buffer: file.buffer,

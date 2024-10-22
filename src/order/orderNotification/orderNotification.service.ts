@@ -20,7 +20,6 @@ export class OrderNotificationService {
       createOrderNotificationDto.orderId,
     );
 
-    console.log(orderDetails, createOrderNotificationDto);
     let reciever: string;
     if (
       orderDetails.advertiser._id.toString() ===
@@ -33,16 +32,16 @@ export class OrderNotificationService {
     ) {
       reciever = orderDetails.advertiser._id.toString();
     }
+    const message = `Trnsaction is completed for order no. ${orderDetails.orderNo}`;
 
     console.log(reciever);
     if (!reciever) {
       throw new Error('No Reciever found');
     }
 
-    const message = ``;
-
     const notification = new this.orderNotificationModel({
       ...createOrderNotificationDto,
+      message,
       reciever,
     });
     return notification.save();
