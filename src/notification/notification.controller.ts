@@ -11,14 +11,14 @@ export class NotificationController {
   async sendNotification(@Body() body: any) {
     const { token, title, body: messageBody, data } = body;
     const payload = { title, body: messageBody, data };
-    return this.notificationService.sendNotification(token, payload);
+    return this.notificationService.sendNotificationByToken(token, payload);
   }
-  @Post('send')
+  @Post('save')
   @UseGuards(JwtAuthGuard)
   async token(
     @Param('userId') userId: string,
     @Body() saveTokenDto: SaveTokenDto,
   ) {
-    return this.notificationService.saveToken(userId, saveTokenDto);
+    return this.notificationService.saveFcmToken(userId, saveTokenDto);
   }
 }

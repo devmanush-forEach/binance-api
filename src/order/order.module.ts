@@ -17,10 +17,13 @@ import { CurrencyModule } from 'src/currency/currency.module';
 import { ChatModule } from 'src/chat/chat.module';
 import { OrderNotificationService } from './orderNotification/orderNotification.service';
 import { AwsModule } from 'src/aws/aws.module';
+import { NotificationModule } from 'src/notification/notification.module';
+import { WalletModule } from 'src/wallet/wallet.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
+    NotificationModule,
     MongooseModule.forFeature([
       { name: Order.name, schema: OrderSchema },
       { name: OrderNotification.name, schema: OrderNotificationSchema }, // Import the OrderNotification schema
@@ -31,6 +34,7 @@ import { AwsModule } from 'src/aws/aws.module';
     CurrencyModule,
     ChatModule,
     AwsModule,
+    WalletModule,
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderNotificationService],

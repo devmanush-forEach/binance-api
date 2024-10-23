@@ -55,29 +55,82 @@ export class WalletService {
     return walletValueWithCoin;
   }
 
-  async addCryptoToWallet(
-    userId: Types.ObjectId,
-    crypto: WalletValue,
+  async addCryptoToUserWallet(
+    userId: string,
+    coinId: string,
+    amount: number,
   ): Promise<Wallet> {
-    const wallet = await this.walletModel
-      .findOne({ userId })
-      .populate('userId');
-    if (!wallet) throw new NotFoundException('Wallet not found');
-    wallet.walletValues.push(crypto);
-    return await wallet.save();
+    const wallet = await this.walletModel.findOne({
+      userId,
+    });
+
+    if (!wallet) {
+      const newWallet = new this.walletModel({
+        userId,
+        walletValues: [],
+      });
+      const walletValues = newWallet.walletValues || [];
+      const cId = new Types.ObjectId(coinId);
+      const value: WalletValue = {
+        coin: cId,
+        balance: amount,
+        address: 'kgjhd ghdfgk jdfshgdfh gdfgh dgh',
+      };
+      newWallet.walletValues = walletValues;
+      return newWallet.save();
+    } else {
+      let walletValues: WalletValue[] = wallet.walletValues;
+
+      const coinWallet = walletValues.find(
+        (walletValue) => walletValue.coin.toString() === coinId,
+      );
+      if (coinWallet) {
+        walletValues = walletValues.map((walletValue: WalletValue) => {
+          if (walletValue.coin.toString() === coinId) {
+            return {
+              ...walletValue,
+              balance: walletValue.balance + amount,
+            };
+          }
+          return walletValue;
+        });
+      } else {
+        walletValues.push({
+          coin: new Types.ObjectId(coinId),
+          address: 'dkjfh skldjfh askdfj h',
+          balance: amount,
+        });
+      }
+
+      wallet.walletValues = walletValues;
+      return wallet.save();
+    }
   }
 
   async removeCryptoFromWallet(
-    userId: Types.ObjectId,
-    coinId: Types.ObjectId,
+    userId: string,
+    coinId: string,
+    amount: number,
   ): Promise<Wallet> {
-    const wallet = await this.walletModel
-      .findOne({ userId })
-      .populate('userId');
-    if (!wallet) throw new NotFoundException('Wallet not found');
-    wallet.walletValues = wallet.walletValues.filter(
-      (crypto) => crypto.coin.toString() !== coinId.toString(),
+    const wallet = await this.walletModel.findOne({ userId });
+    if (!wallet) {
+      throw new BadRequestException('Wallet not found');
+    }
+
+    const cId = new Types.ObjectId(coinId);
+
+    const coinWallet = wallet.walletValues.find(
+      (walletValue) => walletValue.coin == cId,
     );
+    if (!coinWallet) {
+      throw new BadRequestException('Coin not found in wallet');
+    }
+
+    if (coinWallet.balance < amount) {
+      throw new BadRequestException('Insufficient balance');
+    }
+    coinWallet.balance -= amount;
+
     return await wallet.save();
   }
 }

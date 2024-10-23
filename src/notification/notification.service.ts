@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { FirebaseService } from 'src/config/firebase.config';
-import { SaveTokenDto } from './dto/notification.dto';
+import { NotificationDto, SaveTokenDto } from './dto/notification.dto';
 import { UserService } from 'src/user/user.service';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Notification } from './notification.schema';
 
 @Injectable()
 export class NotificationService {
@@ -14,7 +15,7 @@ export class NotificationService {
     private readonly userService: UserService,
   ) {}
 
-  async sendNotification(token: string, payload: any) {
+  async sendNotificationByToken(token: string, payload: NotificationDto) {
     const messaging = this.firebaseService.getMessaging();
     try {
       const response = await messaging.send({
@@ -23,7 +24,7 @@ export class NotificationService {
           title: payload.title,
           body: payload.body,
         },
-        data: payload.data || {}, // Custom data payload
+        data: payload.data || {},
       });
       return { success: true, response };
     } catch (error) {
@@ -31,32 +32,63 @@ export class NotificationService {
     }
   }
 
-  async saveToken(userId: string, saveTokenDto: SaveTokenDto) {
+  async sendNotificationByUserId(userId: string, payload: NotificationDto) {
+    const messaging = this.firebaseService.getMessaging();
+    const existingNotification = await this.notificationModel.findOne({
+      userId,
+    });
+    if (!existingNotification) throw new Error('No Token Found!');
+
+    const tokens: string[] = existingNotification.fcmToken;
+
+    if (!tokens?.length) throw new Error('No Token Found!');
     try {
-    } catch (error) {}
+      for (let token of tokens) {
+        const response = await messaging.send({
+          token,
+          notification: {
+            title: payload.title,
+            body: payload.body,
+          },
+          data: payload.data || {},
+        });
+      }
+      return { success: true };
+    } catch (error) {
+      return { success: false, error };
+    }
   }
 
   async saveFcmToken(userId: string, saveTokenDto: SaveTokenDto) {
-    // Check if the token already exists for the user
     const { token } = saveTokenDto;
+
     const user = await this.userService.findUserById(userId);
-    if (!user) throw new Error('User Not find');
+    if (!user) throw new Error('User Not found');
 
     const existingNotification = await this.notificationModel.findOne({
       userId,
     });
 
     if (existingNotification) {
-      // Update FCM token if it exists
-      return this.notificationModel.updateOne({ userId }, { token });
+      if (!existingNotification.fcmToken.includes(token)) {
+        await this.notificationModel.updateOne(
+          { userId },
+          { $push: { fcmToken: token } },
+        );
+      }
+      return existingNotification;
     }
 
-    // Create a new record if the token doesn't exist
-    const newNotification = new this.notificationModel({ userId, token });
-    return newNotification.save();
+    const newNotification = new this.notificationModel({
+      userId,
+      fcmToken: [token],
+    });
+
+    const data = await newNotification.save();
+    return data;
   }
 
-  async removeFcmToken(userId: string) {
+  async removeFcmToken(userId: string, token: string) {
     return this.notificationModel.deleteOne({ userId });
   }
 }

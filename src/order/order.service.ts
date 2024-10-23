@@ -2,7 +2,7 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { Order, OrderDocument } from './order.schema';
 import {
   CancelOrderDto,
@@ -20,6 +20,10 @@ import { Coin } from 'src/coin/coin.schema';
 import { CoinService } from 'src/coin/coin.service';
 import { CurrencyService } from 'src/currency/currency.service';
 import { ChatService } from 'src/chat/chat.service';
+import { NotificationService } from 'src/notification/notification.service';
+import { title } from 'process';
+import { WalletService } from 'src/wallet/wallet.service';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Injectable()
 export class OrderService {
@@ -30,6 +34,9 @@ export class OrderService {
     private readonly coinService: CoinService,
     private readonly currencyService: CurrencyService,
     private readonly chatService: ChatService,
+    private readonly notificationService: NotificationService,
+    private readonly walletService: WalletService,
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
@@ -68,14 +75,76 @@ export class OrderService {
         };
         const message = await this.chatService.createMessage(messageData);
       }
-      return createdOrder.save();
+
+      if (createdOrder.type === 'sell') {
+        const walletValue = await this.walletService.getCoinBalanceByUserId(
+          createOrderDto.user,
+          coin._id.toString(),
+        );
+        if (!walletValue) throw new Error(`Don't have enough coin wallet.`);
+        if (walletValue.balance < createOrderDto.amount) {
+          throw new Error(`Don't have enough coin wallet.`);
+        }
+        const updated = await this.walletService.removeCryptoFromWallet(
+          createOrderDto.user,
+          coin._id.toString(),
+          createOrderDto.amount,
+        );
+        if (!updated)
+          throw new Error('Advertiser not have enough coin in wallet');
+      } else if (createdOrder.type === 'buy') {
+        const walletValue = await this.walletService.getCoinBalanceByUserId(
+          createOrderDto.advertiser,
+          coin._id.toString(),
+        );
+        if (!walletValue)
+          throw new Error('Advertiser not have enough coin in wallet');
+
+        if (walletValue.balance < createOrderDto.amount) {
+          throw new Error('Advertiser not have enough coin in wallet');
+        }
+        const updated = await this.walletService.removeCryptoFromWallet(
+          createOrderDto.advertiser,
+          coin._id.toString(),
+          createOrderDto.amount,
+        );
+        if (!updated)
+          throw new Error('Advertiser not have enough coin in wallet');
+      }
+
+      const order = await createdOrder.save();
+      if (order) {
+        this.notificationService.sendNotificationByUserId(
+          createOrderDto.advertiser,
+          { title: 'New Order Created' },
+        );
+      }
+      return order;
     } catch (error) {
       console.log(JSON.stringify(error));
     }
   }
 
   async findAll(): Promise<Order[]> {
-    return this.orderModel.find().populate('ad').exec();
+    return this.orderModel
+      .find()
+      .populate([
+        {
+          path: 'paymentService',
+          populate: [
+            {
+              path: 'transactionMethodId',
+              model: 'TransactionMethods',
+            },
+          ],
+        },
+        'user',
+        'ad',
+        'coin',
+        'advertiser',
+        'currency',
+      ])
+      .exec();
   }
 
   async findOne(id: string): Promise<Order> {
@@ -269,12 +338,43 @@ export class OrderService {
     orderId: string,
     cancelOrderDto: CancelOrderDto,
   ): Promise<Order> {
-    const order = await this.orderModel.findById(orderId);
-    console.log('1111111111111111111111');
+    const order = await this.orderModel
+      .findById(orderId)
+      .populate([
+        {
+          path: 'paymentService',
+          populate: [
+            {
+              path: 'transactionMethodId',
+              model: 'TransactionMethods',
+            },
+          ],
+        },
+        'user',
+        'ad',
+        'coin',
+        'advertiser',
+        'currency',
+      ])
+      .exec();
 
     if (!order) {
       throw new NotFoundException('Order not found');
     }
+
+    let walletUser: string;
+    if (order.type == 'sell') {
+      walletUser = order.user._id.toString();
+    } else if (order.type == 'buy') {
+      walletUser = order.advertiser._id.toString();
+    }
+
+    const wallet = this.walletService.addCryptoToUserWallet(
+      walletUser,
+      order.coin._id.toString(),
+      order.amount,
+    );
+    if (!wallet) throw new Error('Something went wrong');
 
     order.status = 'canceled';
     order.cancellationDetails = {
@@ -287,10 +387,86 @@ export class OrderService {
     return order.save();
   }
 
+  async releaseCrypto(orderId: string, userId: string): Promise<Order> {
+    const orderDetails = await this.orderModel
+      .findById(orderId)
+      .populate([
+        {
+          path: 'paymentService',
+          populate: [
+            {
+              path: 'transactionMethodId',
+              model: 'TransactionMethods',
+            },
+          ],
+        },
+        'user',
+        'ad',
+        'coin',
+        'advertiser',
+        'currency',
+      ])
+      .exec();
+    if (!orderDetails) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    const isAdvertiser = orderDetails.advertiser._id.toString() === userId;
+
+    if (
+      (isAdvertiser && orderDetails.type == 'sell') ||
+      (!isAdvertiser && orderDetails.type === 'buy')
+    ) {
+      throw new NotFoundException(`Not Authorised`);
+    }
+
+    let buyerId: string;
+
+    if (isAdvertiser && orderDetails.type == 'buy') {
+      buyerId = orderDetails.user._id.toString();
+    } else if (!isAdvertiser && orderDetails.type === 'sell') {
+      buyerId = orderDetails.advertiser._id.toString();
+    }
+
+    const wallet = await this.walletService.addCryptoToUserWallet(
+      buyerId,
+      orderDetails.coin._id.toString(),
+      orderDetails.amount,
+    );
+
+    if (!wallet) {
+      throw new NotFoundException(`Something went wrong!`);
+    }
+
+    orderDetails.status = 'completed';
+    const order = orderDetails.save();
+
+    this.notificationService.sendNotificationByUserId(buyerId, {
+      title: `OrderNo ${orderDetails.orderNo} Successfully completed`,
+    });
+
+    this.chatGateway.orderUpdated(buyerId, orderDetails.orderNo);
+    return order;
+  }
   async update(id: string, updateOrderDto: any): Promise<Order> {
     const updatedOrder = await this.orderModel
       .findByIdAndUpdate(id, updateOrderDto, { new: true })
-      .populate('ad')
+      .populate([
+        {
+          path: 'paymentService',
+          populate: [
+            {
+              path: 'transactionMethodId',
+              model: 'TransactionMethods',
+            },
+          ],
+        },
+        'user',
+        'ad',
+        'coin',
+        'advertiser',
+        'currency',
+      ])
       .exec();
     if (!updatedOrder) {
       throw new NotFoundException(`Order with ID ${id} not found`);

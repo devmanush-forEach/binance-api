@@ -39,7 +39,7 @@ export class OrderController {
     private readonly chatGateway: ChatGateway,
   ) {}
 
-  @Post(':orderId/notify')
+  @Post(':orderId/transferred')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('images', 3))
   async createOrderNotification(
@@ -49,28 +49,17 @@ export class OrderController {
     @Body() createOrderNotificationDto: CreateOrderNotificationDto,
   ) {
     try {
-      // Upload images to S3 using AwsService
       const imageUrls = await this.awsService.uploadImages(files);
 
-      // Add image URLs to the DTO
       createOrderNotificationDto.images = imageUrls;
 
-      // Create the order notification
       const notification =
-        await this.orderNotificationService.createNotification({
+        await this.orderNotificationService.transaferredNotification({
           ...createOrderNotificationDto,
           orderId,
           sender: userId,
         });
 
-      // Call the pushNotification method to notify the recipient
-      this.chatGateway.pushNotification(notification.reciever.toString(), {
-        title: 'Order Notification',
-        message: `You have a new notification for order ${orderId}.`,
-        orderId,
-      });
-
-      // Return the created notification
       return notification;
     } catch (error) {
       console.error('Error creating order notification:', error);
@@ -80,9 +69,21 @@ export class OrderController {
       );
     }
   }
+  @Post(':orderId/release-crypto')
+  @UseGuards(JwtAuthGuard)
+  async releaseCrypto(
+    @Param('orderId') orderId: string,
+    @Param('userId') userId: string,
+  ) {
+    return this.orderService.releaseCrypto(orderId, userId);
+  }
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
+  @UseGuards(JwtAuthGuard)
+  create(
+    @Body() createOrderDto: CreateOrderDto,
+    @Param('userId') userId: string,
+  ): Promise<Order> {
     return this.orderService.create(createOrderDto);
   }
 

@@ -8,6 +8,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { AwsService } from 'src/aws/aws.service';
+import { Order } from 'src/order/order.schema';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -110,17 +111,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.emit('messages', messages);
   }
 
-  pushNotification(
-    recipient: string,
-    notification: { title: string; message: string; orderId: string },
-  ) {
+  orderUpdated(recipient: string, orderNo: number) {
     const recipientSocketId = this.userSockets.get(recipient);
     if (recipientSocketId) {
-      this.server.to(recipientSocketId).emit('notification', notification);
-      console.log(`Notification sent to recipient: ${recipient}`, notification);
+      this.server.to(recipientSocketId).emit('orderUpdated', { orderNo });
+      console.log(`Notification sent to recipient: ${recipient}`);
     } else {
       console.log(`Recipient not connected: ${recipient}`);
     }
-    console.log(`Notification sent to recipient: ${recipient}`, notification);
+    console.log(`Notification sent to recipient: ${recipient}`);
   }
 }

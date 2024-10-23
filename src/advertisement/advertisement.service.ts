@@ -25,6 +25,18 @@ export class AdvertisementService {
     );
     return await newAdvertisement.save();
   }
+  async toggleStatus(adId: string, userId: string): Promise<Advertisement> {
+    const updatedAdvertisement = await this.advertisementModel
+      .findById(adId)
+      .exec();
+
+    updatedAdvertisement.isOnline = !updatedAdvertisement.isOnline;
+
+    if (!updatedAdvertisement) {
+      throw new NotFoundException('Advertisement not found');
+    }
+    return updatedAdvertisement.save();
+  }
 
   async findAll(): Promise<Advertisement[]> {
     return this.advertisementModel

@@ -1,7 +1,5 @@
 import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { WalletService } from './wallet.service';
-import { Types } from 'mongoose';
-import { WalletValue } from './crypto/crypto.schema';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
 
 @Controller('wallet')
@@ -22,19 +20,18 @@ export class WalletController {
   @Post('add/:userId')
   async addCrypto(
     @Param('userId') userId: string,
-    @Body() crypto: WalletValue,
+    @Body() crypto: string,
+    @Body() amount: number,
   ) {
-    const id = new Types.ObjectId(userId);
-    return this.walletService.addCryptoToWallet(id, crypto);
+    return this.walletService.addCryptoToUserWallet(userId, crypto, amount);
   }
 
   @Post('remove/:userId/:coinId')
   async removeCrypto(
     @Param('userId') userId: string,
-    @Param('coinId') coinId: string,
+    @Body('coinId') coinId: string,
+    @Body('amount') amount: number,
   ) {
-    const userIdObj = new Types.ObjectId(userId);
-    const coinIdObj = new Types.ObjectId(coinId);
-    return this.walletService.removeCryptoFromWallet(userIdObj, coinIdObj);
+    return this.walletService.removeCryptoFromWallet(userId, coinId, amount);
   }
 }

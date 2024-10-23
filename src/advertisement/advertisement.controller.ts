@@ -26,6 +26,10 @@ export class AdvertisementController {
   async create(@Body() createAdvertisementDto: CreateAdvertisementDto) {
     return this.advertisementService.create(createAdvertisementDto);
   }
+  @Patch('toggleStatus/:id')
+  async toggleStatus(@Param('id') id: string, @Param('userId') userId: string) {
+    return this.advertisementService.toggleStatus(id, userId);
+  }
 
   @Get()
   async findAll() {

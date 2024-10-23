@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 import { OrderNotification } from './orderNotification.schema';
 import { CreateOrderNotificationDto } from './dto/orderNotification.dto';
 import { OrderService } from '../order.service';
+import { NotificationService } from 'src/notification/notification.service';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Injectable()
 export class OrderNotificationService {
@@ -11,9 +13,11 @@ export class OrderNotificationService {
     @InjectModel(OrderNotification.name)
     private readonly orderNotificationModel: Model<OrderNotification>,
     private readonly orderService: OrderService,
+    private readonly chatGateway: ChatGateway,
+    private readonly notificationService: NotificationService,
   ) {}
 
-  async createNotification(
+  async transaferredNotification(
     createOrderNotificationDto: CreateOrderNotificationDto,
   ): Promise<OrderNotification> {
     const orderDetails = await this.orderService.findOne(
@@ -44,6 +48,26 @@ export class OrderNotificationService {
       message,
       reciever,
     });
+
+    this.notificationService.sendNotificationByUserId(
+      notification.reciever.toString(),
+      {
+        title: 'Order Notification',
+        body: message,
+      },
+    );
+
+    const order = await this.orderService.update(
+      createOrderNotificationDto.orderId,
+      {
+        status: 'paid',
+      },
+    );
+    this.chatGateway.orderUpdated(
+      notification.reciever.toString(),
+      order.orderNo,
+    );
+
     return notification.save();
   }
 }
