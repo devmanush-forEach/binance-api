@@ -46,8 +46,6 @@ export class WalletService {
       .lean()
       .exec();
 
-    if (!wallet) throw new NotFoundException('Wallet not found');
-
     const walletValueWithCoin = wallet?.walletValues?.find(
       (value) => value.coin.toString() === coinId,
     );

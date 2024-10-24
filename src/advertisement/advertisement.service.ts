@@ -281,6 +281,7 @@ export class AdvertisementService {
         coinId,
       );
       if (ad.adType === 'sell' && walletValue?.balance < 1) {
+        throw new Error('Not have enough coin in Wallet');
       } else {
         advertisements.push({
           ...ad,
