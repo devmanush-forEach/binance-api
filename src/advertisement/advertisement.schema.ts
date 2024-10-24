@@ -55,8 +55,8 @@ export class Advertisement extends Document {
   @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
   currency: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: Country.name, required: true })
-  regions: Types.ObjectId;
+  @Prop({ type: [Types.ObjectId], ref: Country.name, required: true })
+  regions: Types.ObjectId[];
 
   @Prop({ type: Boolean, required: true, default: false })
   allRegions: boolean;

@@ -32,8 +32,18 @@ export class AdvertisementController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll() {
     return this.advertisementService.findAll();
+  }
+
+  @Get('detail/:adId')
+  @UseGuards(JwtAuthGuard)
+  async getDetails(
+    @Param('userId') userId: string,
+    @Param('adId') adId: string,
+  ) {
+    return this.advertisementService.getDetails(userId, adId);
   }
 
   @Get('search')
@@ -81,7 +91,7 @@ export class AdvertisementController {
     );
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   async update(
     @Param('id') id: string,
     @Body() updateAdvertisementDto: UpdateAdvertisementDto,

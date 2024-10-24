@@ -50,6 +50,30 @@ export class AdvertisementService {
       .populate('coinId')
       .exec();
   }
+  async getDetails(userId: string, adId: string): Promise<Advertisement> {
+    const [ad] = await this.advertisementModel
+      .find({ _id: adId, userId })
+      .populate([
+        'paymentMethods',
+        {
+          path: 'paymentMethods',
+          populate: {
+            path: 'transactionMethodId',
+            model: 'TransactionMethods',
+          },
+        },
+        'transactionMethods',
+        'currency',
+        'coinId',
+        'userId',
+      ])
+      .lean()
+      .exec();
+
+    if (!ad) throw new Error('No Ad found!');
+
+    return ad;
+  }
 
   async getBuyAdvertisements(): Promise<Advertisement[]> {
     return await this.advertisementModel
@@ -299,9 +323,6 @@ export class AdvertisementService {
   ): Promise<Advertisement> {
     const updatedAdvertisement = await this.advertisementModel
       .findByIdAndUpdate(id, updateAdvertisementDto, { new: true })
-      .populate('paymentMethod')
-      .populate('currency')
-      .populate('coinId')
       .exec();
 
     if (!updatedAdvertisement) {

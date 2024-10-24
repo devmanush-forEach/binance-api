@@ -116,10 +116,75 @@ export class CreateAdvertisementDto {
   @IsOptional()
   counterPartyConditions?: CounterPartyConditionsDto;
 }
+export class UpdateAdvertisementDto {
+  @IsMongoId()
+  @IsNotEmpty()
+  userId: Types.ObjectId;
 
-export class UpdateAdvertisementDto extends PartialType(
-  CreateAdvertisementDto,
-) {}
+  @IsBoolean()
+  @IsNotEmpty()
+  isOnline: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  transactionPrice?: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  amount: number;
+
+  @IsNumber()
+  @IsOptional()
+  pricePercent?: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  transactionLimitMin: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  transactionLimitMax: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  transactionTimeLimit: number;
+
+  @IsString()
+  @IsOptional()
+  transactionTitle?: string;
+
+  @IsString()
+  @IsOptional()
+  transactionRemark?: string;
+
+  @IsString()
+  @IsOptional()
+  autoReplyMessage?: string;
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  transactionMethods?: Types.ObjectId[];
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  paymentMethods?: Types.ObjectId[];
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  regions?: Types.ObjectId[];
+
+  @IsBoolean()
+  @IsNotEmpty()
+  allRegions: boolean;
+
+  @ValidateNested()
+  @Type(() => CounterPartyConditionsDto)
+  @IsOptional()
+  counterPartyConditions?: CounterPartyConditionsDto;
+}
 
 export class DateRange {
   @IsOptional()
