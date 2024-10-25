@@ -30,6 +30,42 @@ export class AuthService {
       throw new Error('Invalid token');
     }
   }
+  async updateLoginPass(
+    userId: string,
+    currentPass: string,
+    newPass: string,
+  ): Promise<any> {
+    try {
+      const user = await this.userService.findUserById(userId);
+      if (!user) throw new Error('Invalida credentials!');
+      const validated = await bcrypt.compare(currentPass, user.password);
+      if (!validated) throw new Error('Wrong current password!');
+
+      const hashedPassword = await bcrypt.hash(newPass, 10);
+
+      const update = await this.userService.updateUser(userId, {
+        password: hashedPassword,
+      });
+      return update;
+    } catch (error) {
+      throw new Error('Invalid token');
+    }
+  }
+  async resetLoginPass(email: string, newPass: string): Promise<any> {
+    try {
+      const user: any = await this.userService.findUserByEmail(email);
+      if (!user) throw new Error('Invalida credentials!');
+
+      const hashedPassword = await bcrypt.hash(newPass, 10);
+
+      const update = await this.userService.updateUser(user._id, {
+        password: hashedPassword,
+      });
+      return update;
+    } catch (error) {
+      throw new Error('Invalid token');
+    }
+  }
 
   async login(user: any, res: Response) {
     const payload = { email: user.email, sub: user._id, role: user.role };

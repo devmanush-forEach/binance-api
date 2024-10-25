@@ -8,8 +8,25 @@ export type OTPDocument = OTP & Document;
   versionKey: false,
 })
 export class OTP {
-  @Prop({ required: true })
-  phoneNumber: string;
+  @Prop({
+    validate: {
+      validator: function (this: OTP, value: string) {
+        return !!value || !!this.email;
+      },
+      message: 'Either phoneNumber or email must be provided.',
+    },
+  })
+  phoneNumber?: string;
+
+  @Prop({
+    validate: {
+      validator: function (this: OTP, value: string) {
+        return !!value || !!this.phoneNumber;
+      },
+      message: 'Either phoneNumber or email must be provided.',
+    },
+  })
+  email?: string;
 
   @Prop({ required: true })
   otp: string;

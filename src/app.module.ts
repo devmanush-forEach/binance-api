@@ -23,6 +23,7 @@ import { CounterModule } from './counter/counter.module';
 import awsConfig from './config/aws.config';
 import { AwsModule } from './aws/aws.module';
 import { NotificationModule } from './notification/notification.module';
+import { OTPModule } from './otp/otp.module';
 
 @Module({
   imports: [
@@ -56,7 +57,7 @@ import { NotificationModule } from './notification/notification.module';
     CounterModule,
     AwsModule,
     NotificationModule,
-    // OTPModule
+    OTPModule,
   ],
   controllers: [AppController],
   providers: [AppService],

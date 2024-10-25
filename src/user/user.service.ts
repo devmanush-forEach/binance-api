@@ -23,7 +23,11 @@ export class UserService {
   async createUser(user: CreateUserDto): Promise<User> {
     const { password } = user;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userBody: CreateUserDto = { ...user, password: hashedPassword };
+    const userBody: CreateUserDto = {
+      ...user,
+      password: hashedPassword,
+      emailVerified: true,
+    };
     const newUser = new this.userModel(userBody);
     const userData = await newUser.save();
     const userId = userData._id;

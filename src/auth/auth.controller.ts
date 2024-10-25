@@ -10,19 +10,29 @@ import {
   HttpStatus,
   Get,
   HttpException,
+  Param,
+  Patch,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/user/user.schema';
-import { Request, Response } from 'express';
-import { CreateUserDto, UpdateUserDto } from 'src/user/dto/user.dto';
+import { Request, response, Response } from 'express';
+import {
+  CreateTransactionPassword,
+  CreateUserDto,
+  UpdateUserDto,
+} from 'src/user/dto/user.dto';
+import { JwtAuthGuard } from './gaurds/jwt-auth.gaurd';
+import { OTPService } from 'src/otp/otp.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private userService: UserService,
+    private otpService: OTPService,
   ) {}
 
   @Get('jwt')
@@ -57,7 +67,22 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() body: CreateUserDto) {
+    const emailOtp = body.emailOtp;
+    delete body.emailOtp;
+    const email = body.email;
+
+    const otpVerified = await this.otpService.verifyEmailOTP(email, emailOtp);
+    if (!otpVerified) {
+      throw new BadRequestException('Entered Wrong OTP!');
+    }
+
     return this.userService.createUser(body);
+  }
+
+  @Post('create-transaction-password')
+  @UseGuards(JwtAuthGuard)
+  async createTransactionPassword(@Body() body: CreateTransactionPassword) {
+    // return this.userService.createUser(body);
   }
 
   @Post('login')
@@ -71,6 +96,50 @@ export class AuthController {
     }
     const result = await this.authService.login(user, res);
     return res.status(HttpStatus.OK).json(result);
+  }
+
+  @Patch('update-login-pass')
+  @UseGuards(JwtAuthGuard)
+  async updateLoginPass(
+    @Param('userId') userId: string,
+    @Body() body: { currentPass: string; newPassword: string },
+    @Res() res: Response,
+  ) {
+    const user = await this.authService.updateLoginPass(
+      userId,
+      body.currentPass,
+      body.newPassword,
+    );
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    delete user._id;
+    delete user.password;
+    return res.status(HttpStatus.OK).json(user);
+  }
+  @Patch('reset-login-pass')
+  async resetLoginPass(
+    @Body() body: { email: string; otp: string; newPassword: string },
+    @Res() res: Response,
+  ) {
+    const otpVerified = await this.otpService.verifyEmailOTP(
+      body.email,
+      body.otp,
+    );
+    if (!otpVerified) {
+      throw new BadRequestException('Entered Wrong OTP!');
+    }
+
+    const user = await this.authService.resetLoginPass(
+      body.email,
+      body.newPassword,
+    );
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    delete user._id;
+    delete user.password;
+    return res.status(HttpStatus.OK).json(user);
   }
 
   @UseGuards(AuthGuard('jwt'))
