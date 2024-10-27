@@ -123,7 +123,7 @@ export class AuthService {
         httpOnly: true,
         secure: true,
         maxAge: 60 * 60 * 24,
-        sameSite: 'strict',
+        sameSite: 'none',
         path: '/',
       }),
     );
