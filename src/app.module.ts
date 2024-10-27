@@ -27,9 +27,6 @@ import { OTPModule } from './otp/otp.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      'mongodb+srv://nikhil:BwBkJQcpwmnmJRLG@ck-clustor.u9m29.mongodb.net/?retryWrites=true&w=majority&appName=ck-clustor',
-    ),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -38,6 +35,7 @@ import { OTPModule } from './otp/otp.module';
       isGlobal: true,
       load: [awsConfig],
     }),
+    MongooseModule.forRoot(process.env.MONGODB_URL),
     AuthModule,
     UserModule,
     CoinModule,
