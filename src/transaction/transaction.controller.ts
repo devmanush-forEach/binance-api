@@ -10,6 +10,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { Transaction } from './transaction.schema';
@@ -19,10 +20,14 @@ import {
   SearchTransactionsDto,
   WithdrawalDto,
 } from './dto/transaction.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('transactions')
 export class TransactionController {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(
+    private readonly transactionService: TransactionService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post()
   create(@Body() createTransactionDto: any): Promise<Transaction> {
@@ -73,6 +78,23 @@ export class TransactionController {
     @Param('userId') userId: string,
     @Body() withdrawDto: WithdrawalDto,
   ) {
+    const transactionPassword = withdrawDto.transactionPassword;
+    delete withdrawDto.transactionPassword;
+    if (!transactionPassword) {
+      throw new BadRequestException(
+        'Please Enter A Valid Transaction Password!',
+      );
+    }
+
+    const isVerified = await this.authService.verifyTransactionPassword(
+      userId,
+      { transactionPassword },
+    );
+    if (!isVerified) {
+      throw new BadRequestException(
+        'Please Enter A Valid Transaction Password!',
+      );
+    }
     return this.transactionService.withdraw(userId, withdrawDto);
   }
   @Patch('complete/:id')

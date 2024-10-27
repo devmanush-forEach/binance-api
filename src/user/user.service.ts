@@ -8,7 +8,11 @@ import { WalletService } from 'src/wallet/wallet.service';
 import { UPIDetailsService } from 'src/upi-details/upi-details.service';
 import { BankDetailsService } from 'src/bank-details/bank-details.service';
 import { TransactionMethodsService } from 'src/transactions-methods/transaction-methods.service';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import {
+  CreateTransactionPassword,
+  CreateUserDto,
+  UpdateUserDto,
+} from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -38,7 +42,7 @@ export class UserService {
   }
 
   async findUserByPhone(phone: string): Promise<User | undefined> {
-    return this.userModel.findOne({ phone }).lean().exec();
+    return this.userModel.findOne({ phone }).populate('country').lean().exec();
   }
 
   async findAllUsers(
@@ -83,7 +87,8 @@ export class UserService {
   }
 
   async findUserById(id: string): Promise<User | undefined> {
-    return this.userModel.findById(id).lean().exec();
+    const data = await this.userModel.findById(id).lean().exec();
+    return data;
   }
 
   async getAllAddedPaymentMethods(userId: string) {
@@ -108,6 +113,22 @@ export class UserService {
     const user = await this.userModel.findByIdAndUpdate(userId, updateUserDto, {
       new: true,
     });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+  async updateTransactionPasswod(
+    userId: string,
+    transactionPassword: string,
+  ): Promise<User> {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { transactionPassword },
+      {
+        new: true,
+      },
+    );
     if (!user) {
       throw new NotFoundException('User not found');
     }

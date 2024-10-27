@@ -19,7 +19,8 @@ export class OTPService {
   }
 
   async sendOTP(phoneNumber: string): Promise<string> {
-    const otp = uuidv4().slice(0, 6);
+    // const otp = uuidv4().slice(0, 6);
+    const otp = '112233';
     // await this.twilioClient.messages.create({
     //   body: `Your OTP is ${otp}`,
     //   from: process.env.TWILIO_PHONE_NUMBER,
@@ -37,7 +38,8 @@ export class OTPService {
     return 'successfully Sent';
   }
   async sendMailOTP(email: string): Promise<string> {
-    const otp = uuidv4().slice(0, 6);
+    // const otp = uuidv4().slice(0, 6);
+    const otp = '112233';
     // await this.twilioClient.messages.create({
     //   body: `Your OTP is ${otp}`,
     //   from: process.env.TWILIO_PHONE_NUMBER,

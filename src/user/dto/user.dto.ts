@@ -65,6 +65,18 @@ export class CreateTransactionPassword {
   @IsNotEmpty()
   @IsString()
   transactionPassword: string;
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+  @IsNotEmpty()
+  @IsString()
+  otp: string;
+}
+
+export class VerifyTransactionPassword {
+  @IsNotEmpty()
+  @IsString()
+  transactionPassword: string;
 }
 
 export class UpdateUserDto {

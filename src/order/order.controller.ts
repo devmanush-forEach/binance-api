@@ -14,6 +14,7 @@ import {
   UploadedFiles,
   HttpException,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { Order } from './order.schema';
@@ -29,6 +30,7 @@ import { CreateOrderNotificationDto } from './orderNotification/dto/orderNotific
 import { OrderNotificationService } from './orderNotification/orderNotification.service';
 import { AwsService } from 'src/aws/aws.service';
 import { ChatGateway } from 'src/chat/chat.gateway';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('orders')
 export class OrderController {
@@ -37,6 +39,7 @@ export class OrderController {
     private readonly orderNotificationService: OrderNotificationService,
     private readonly awsService: AwsService,
     private readonly chatGateway: ChatGateway,
+    private readonly authService: AuthService,
   ) {}
 
   @Post(':orderId/transferred')
@@ -80,10 +83,27 @@ export class OrderController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(
+  async create(
     @Body() createOrderDto: CreateOrderDto,
     @Param('userId') userId: string,
   ): Promise<Order> {
+    const transactionPassword = createOrderDto.transactionPassword;
+    delete createOrderDto.transactionPassword;
+    if (!transactionPassword) {
+      throw new BadRequestException(
+        'Please Enter A Valid Transaction Password!',
+      );
+    }
+
+    const isVerified = await this.authService.verifyTransactionPassword(
+      userId,
+      { transactionPassword },
+    );
+    if (!isVerified) {
+      throw new BadRequestException(
+        'Please Enter A Valid Transaction Password!',
+      );
+    }
     return this.orderService.create(createOrderDto);
   }
 

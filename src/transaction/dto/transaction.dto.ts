@@ -46,6 +46,10 @@ export class WithdrawalDto {
   @IsString()
   @IsNotEmpty()
   withdrawAddress: string;
+
+  @IsString()
+  @IsOptional()
+  transactionPassword: string;
 }
 
 export type TransactionType = 'credit' | 'debit';

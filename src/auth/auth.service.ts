@@ -1,10 +1,18 @@
 // src/auth/auth.service.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { UserService } from '../user/user.service';
 import { Response } from 'express';
 import * as cookie from 'cookie';
 import { JwtService } from '@nestjs/jwt';
+import {
+  CreateTransactionPassword,
+  VerifyTransactionPassword,
+} from 'src/user/dto/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -62,6 +70,45 @@ export class AuthService {
         password: hashedPassword,
       });
       return update;
+    } catch (error) {
+      throw new Error('Invalid token');
+    }
+  }
+  async setTransactionPassword(
+    userId: string,
+    body: CreateTransactionPassword,
+  ): Promise<any> {
+    try {
+      const user: any = await this.userService.findUserById(userId);
+      if (!user) throw new BadRequestException('Please login first!');
+
+      const transactionPassword = body.transactionPassword;
+      const hashedPassword = await bcrypt.hash(transactionPassword, 10);
+
+      const update = await this.userService.updateTransactionPasswod(
+        user._id,
+        hashedPassword,
+      );
+      if (!update) throw new BadRequestException('UserId is not valid!');
+      return update;
+    } catch (error) {
+      throw new Error('Invalid token');
+    }
+  }
+  async verifyTransactionPassword(
+    userId: string,
+    body: VerifyTransactionPassword,
+  ): Promise<any> {
+    try {
+      const user: any = await this.userService.findUserById(userId);
+      if (!user) throw new BadRequestException('Please login first!');
+      const pass = user.transactionPassword;
+
+      const compareResponse = await bcrypt.compare(
+        body.transactionPassword,
+        user.transactionPassword,
+      );
+      return compareResponse;
     } catch (error) {
       throw new Error('Invalid token');
     }

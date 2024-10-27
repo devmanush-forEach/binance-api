@@ -115,6 +115,10 @@ export class CreateAdvertisementDto {
   @Type(() => CounterPartyConditionsDto)
   @IsOptional()
   counterPartyConditions?: CounterPartyConditionsDto;
+
+  @IsString()
+  @IsOptional()
+  transactionPassword: string;
 }
 export class UpdateAdvertisementDto {
   @IsMongoId()

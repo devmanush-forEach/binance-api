@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { AdvertisementService } from './advertisement.service';
 import {
@@ -17,13 +18,41 @@ import {
   UpdateAdvertisementDto,
 } from './dto/advertisement.dto';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('advertisements')
 export class AdvertisementController {
-  constructor(private readonly advertisementService: AdvertisementService) {}
+  constructor(
+    private readonly advertisementService: AdvertisementService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post()
-  async create(@Body() createAdvertisementDto: CreateAdvertisementDto) {
+  @UseGuards(JwtAuthGuard)
+  async create(
+    @Param('userId') userId: string,
+    @Body() createAdvertisementDto: CreateAdvertisementDto,
+  ) {
+    const transactionPassword = createAdvertisementDto.transactionPassword;
+    delete createAdvertisementDto.transactionPassword;
+    const adType = createAdvertisementDto.adType;
+    if (adType === 'sell') {
+      if (!transactionPassword) {
+        throw new BadRequestException(
+          'Please Enter A Valid Transaction Password!',
+        );
+      }
+
+      const isVerified = await this.authService.verifyTransactionPassword(
+        userId,
+        { transactionPassword },
+      );
+      if (!isVerified) {
+        throw new BadRequestException(
+          'Please Enter A Valid Transaction Password!',
+        );
+      }
+    }
     return this.advertisementService.create(createAdvertisementDto);
   }
   @Patch('toggleStatus/:id')

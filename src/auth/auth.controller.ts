@@ -23,6 +23,7 @@ import {
   CreateTransactionPassword,
   CreateUserDto,
   UpdateUserDto,
+  VerifyTransactionPassword,
 } from 'src/user/dto/user.dto';
 import { JwtAuthGuard } from './gaurds/jwt-auth.gaurd';
 import { OTPService } from 'src/otp/otp.service';
@@ -50,12 +51,15 @@ export class AuthController {
       const { email, userId } =
         await this.authService.validateUserByToken(token);
 
-      const { password, role, ...user } =
+      const { password, role, transactionPassword, ...user } =
         await this.userService.findUserById(userId);
+
+      const isTransactionPassword = !!transactionPassword;
+      const data = { ...user, isTransactionPassword };
 
       return res.status(HttpStatus.OK).json({
         message: 'Token is valid',
-        user,
+        user: data,
       });
     } catch (error) {
       throw new HttpException(
@@ -81,8 +85,27 @@ export class AuthController {
 
   @Post('create-transaction-password')
   @UseGuards(JwtAuthGuard)
-  async createTransactionPassword(@Body() body: CreateTransactionPassword) {
-    // return this.userService.createUser(body);
+  async createTransactionPassword(
+    @Param('userId') userId: string,
+    @Body() body: CreateTransactionPassword,
+  ) {
+    const { email, otp } = body;
+
+    const otpVerified = await this.otpService.verifyEmailOTP(email, otp);
+    if (!otpVerified) {
+      throw new BadRequestException('Entered Wrong OTP!');
+    }
+
+    return this.authService.setTransactionPassword(userId, body);
+  }
+
+  @Post('verify-transaction-password')
+  @UseGuards(JwtAuthGuard)
+  async verifyTransactionPassword(
+    @Param('userId') userId: string,
+    @Body() body: VerifyTransactionPassword,
+  ) {
+    return this.authService.verifyTransactionPassword(userId, body);
   }
 
   @Post('login')

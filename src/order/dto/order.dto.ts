@@ -79,6 +79,10 @@ export class CreateOrderDto {
   @IsNotEmpty()
   @IsMongoId()
   user: string;
+
+  @IsString()
+  @IsOptional()
+  transactionPassword: string;
 }
 
 export class DateRangeDTO {
