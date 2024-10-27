@@ -121,9 +121,9 @@ export class AuthService {
       'Set-Cookie',
       cookie.serialize('access_token', token, {
         httpOnly: true,
-        secure: true,
+        secure: false,
         maxAge: 60 * 60 * 24,
-        sameSite: 'none',
+        sameSite: 'strict',
         path: '/',
       }),
     );
