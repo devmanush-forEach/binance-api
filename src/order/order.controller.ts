@@ -89,7 +89,7 @@ export class OrderController {
   ): Promise<Order> {
     const transactionPassword = createOrderDto.transactionPassword;
     delete createOrderDto.transactionPassword;
-    if (!transactionPassword) {
+    if (!transactionPassword && createOrderDto.type === 'sell') {
       throw new BadRequestException(
         'Please Enter A Valid Transaction Password!',
       );
@@ -99,7 +99,7 @@ export class OrderController {
       userId,
       { transactionPassword },
     );
-    if (!isVerified) {
+    if (!isVerified && createOrderDto.type === 'sell') {
       throw new BadRequestException(
         'Please Enter A Valid Transaction Password!',
       );

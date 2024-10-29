@@ -102,7 +102,9 @@ export class AuthService {
     try {
       const user: any = await this.userService.findUserById(userId);
       if (!user) throw new BadRequestException('Please login first!');
-      const pass = user.transactionPassword;
+      if (!body.transactionPassword) {
+        return false;
+      }
 
       const compareResponse = await bcrypt.compare(
         body.transactionPassword,
