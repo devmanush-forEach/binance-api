@@ -8,7 +8,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { AwsService } from 'src/aws/aws.service';
-import { Order } from 'src/order/order.schema';
 
 @WebSocketGateway({
   namespace: '/chat',
