@@ -96,3 +96,19 @@ export class SearchTransactionsDto {
   @Type(() => Number)
   limit?: number;
 }
+
+export class GetStatementDto {
+  @IsOptional()
+  @IsString()
+  user?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  page?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  limit?: number;
+}

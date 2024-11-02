@@ -17,6 +17,7 @@ import { Transaction } from './transaction.schema';
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt-auth.gaurd';
 import {
   DepositDto,
+  GetStatementDto,
   SearchTransactionsDto,
   WithdrawalDto,
 } from './dto/transaction.dto';
@@ -41,6 +42,18 @@ export class TransactionController {
     @Query() filters: SearchTransactionsDto,
   ): Promise<Transaction[]> {
     return this.transactionService.searchTransactions({
+      ...filters,
+      user: userId,
+    });
+  }
+
+  @Get('/statement')
+  @UseGuards(JwtAuthGuard)
+  getStatement(
+    @Param('userId') userId: string,
+    @Query() filters: GetStatementDto,
+  ): Promise<Transaction[]> {
+    return this.transactionService.getStatement({
       ...filters,
       user: userId,
     });

@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid'; // Import UUID generator
 import { Transaction, TransactionDocument } from './transaction.schema';
 import {
   DepositDto,
+  GetStatementDto,
   SearchTransactionsDto,
   WithdrawalDto,
 } from './dto/transaction.dto';
@@ -82,6 +83,54 @@ export class TransactionService {
 
     if (filters.depositAddress) {
       query.depositAddress = filters.depositAddress;
+    }
+
+    const page = filters.page || 1;
+    const limit = filters.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const [results, total, statusCounts] = await Promise.all([
+      this.transactionModel
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .populate(['coin', 'user', 'network'])
+        .exec(),
+      this.transactionModel.countDocuments(query),
+      this.transactionModel.aggregate([
+        {
+          $match: {
+            ...query,
+            status: { $in: ['completed', 'failed', 'pending'] },
+          },
+        },
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    const statusCountsFormatted = statusCounts.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
+
+    return {
+      transactions: results,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
+  }
+
+  async getStatement(filters: GetStatementDto): Promise<any> {
+    const query: any = {};
+
+    if (filters.user) {
+      query.user = filters.user;
     }
 
     const page = filters.page || 1;

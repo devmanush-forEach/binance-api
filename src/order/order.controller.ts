@@ -1,5 +1,3 @@
-// src/order/order.controller.ts
-
 import {
   Controller,
   Get,
