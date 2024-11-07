@@ -384,6 +384,15 @@ export class OrderService {
       cancelledAt: new Date(),
     };
 
+    if (order) {
+      this.notificationService.sendNotificationByUserId(
+        order.advertiser._id.toString(),
+        {
+          title: `Order ${order.orderNo}  is cancelled by ${cancelOrderDto.cancelledBy}`,
+        },
+      );
+    }
+
     return order.save();
   }
 
@@ -442,7 +451,7 @@ export class OrderService {
     const order = orderDetails.save();
 
     this.notificationService.sendNotificationByUserId(buyerId, {
-      title: `OrderNo ${orderDetails.orderNo} Successfully completed`,
+      title: `OrderNo ${orderDetails.orderNo} successfully completed`,
     });
 
     this.chatGateway.orderUpdated(buyerId, orderDetails.orderNo);

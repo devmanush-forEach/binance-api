@@ -18,6 +18,7 @@ import {
 import { Wallet, WalletDocument } from 'src/wallet/wallet.schema';
 import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 import { WalletValue } from 'src/wallet/crypto/crypto.schema';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class TransactionService {
@@ -26,6 +27,7 @@ export class TransactionService {
     private transactionModel: Model<TransactionDocument>,
     @InjectModel(Wallet.name) private walletModel: Model<WalletDocument>,
     private readonly notificationsGateway: NotificationsGateway,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(createTransactionDto: any): Promise<Transaction> {
@@ -394,6 +396,11 @@ export class TransactionService {
           wallet.save();
         }
         transaction.status = 'completed';
+        if (transaction) {
+          this.notificationService.sendNotificationByUserId(userId.toString(), {
+            title: `Transaction Compketed`,
+          });
+        }
         await transaction.save();
       } else if (transaction.transactionType === 'debit') {
         if (!wallet) {
@@ -402,6 +409,11 @@ export class TransactionService {
           );
         }
         transaction.status = 'completed';
+        if (transaction) {
+          this.notificationService.sendNotificationByUserId(userId.toString(), {
+            title: `Transaction Compketed`,
+          });
+        }
         await transaction.save();
       }
       return transaction;
@@ -442,6 +454,12 @@ export class TransactionService {
         },
       );
       wallet.save();
+    }
+
+    if (transaction) {
+      this.notificationService.sendNotificationByUserId(userId.toString(), {
+        title: `Transaction Failed`,
+      });
     }
     return transaction;
   }

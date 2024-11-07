@@ -6,11 +6,13 @@ import { Transaction, TransactionSchema } from './transaction.schema';
 import { AuthModule } from 'src/auth/auth.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 import { WalletModule } from 'src/wallet/wallet.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
     AuthModule,
     NotificationsModule,
+    NotificationModule,
     WalletModule,
     MongooseModule.forFeature([
       { name: Transaction.name, schema: TransactionSchema },

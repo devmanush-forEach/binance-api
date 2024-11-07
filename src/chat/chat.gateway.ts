@@ -8,6 +8,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { AwsService } from 'src/aws/aws.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -21,6 +22,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly chatService: ChatService,
     private readonly awsService: AwsService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   private userSockets: Map<string, string> = new Map();
@@ -60,8 +62,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { sender, recipient, content, orderId, image } = payload;
 
-    console.log(image);
-
     let messageData = {
       sender,
       recipient,
@@ -87,8 +87,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       const message = await this.chatService.createMessage(messageData);
+
       this.server.to(recipient).emit('receiveMessage', message);
       this.server.to(sender).emit('receiveMessage', message);
+
+      if (message) {
+        this.notificationService.sendNotificationByUserId(recipient, {
+          title: `New message arrived`,
+        });
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       client.emit('uploadError', { error: 'Image upload failed.' });
