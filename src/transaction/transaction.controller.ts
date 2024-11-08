@@ -110,15 +110,15 @@ export class TransactionController {
     }
     return this.transactionService.withdraw(userId, withdrawDto);
   }
-  @Patch('complete/:id')
-  // @UseGuards(JwtAuthGuard)
-  async complete(@Param('userId') userId: string, @Param('id') id: string) {
+  @Patch('complete')
+  @UseGuards(JwtAuthGuard)
+  async complete(@Param('userId') userId: string, @Body('id') id: string) {
     return this.transactionService.complete(id);
   }
 
-  @Patch('fail/:id')
-  // @UseGuards(JwtAuthGuard)
-  async fail(@Param('userId') userId: string, @Param('id') id: string) {
+  @Patch('fail')
+  @UseGuards(JwtAuthGuard)
+  async fail(@Param('userId') userId: string, @Body('id') id: string) {
     return this.transactionService.fail(id);
   }
 
