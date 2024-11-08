@@ -27,10 +27,16 @@ export class WalletService {
       .findOne({ userId })
       .select({ userId: 0 })
       .lean()
-      .populate({
-        path: 'walletValues.coin',
-        model: 'Coin',
-      })
+      .populate([
+        {
+          path: 'walletValues.coin',
+          model: 'Coin',
+          populate: {
+            path: 'currency',
+            model: 'Currency',
+          },
+        },
+      ])
       .exec();
 
     if (!wallet) throw new NotFoundException('Wallet not found');

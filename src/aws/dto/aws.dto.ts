@@ -1,4 +1,10 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class UploadImageDto {
   @IsOptional()
@@ -10,4 +16,14 @@ export class UploadImageDto {
   @IsString()
   @MaxLength(500)
   description?: string;
+}
+
+export class SendSmsDto {
+  @IsPhoneNumber()
+  @IsNotEmpty()
+  phoneNumber: string;
+
+  @IsString()
+  @IsNotEmpty()
+  message: string;
 }

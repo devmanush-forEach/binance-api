@@ -111,4 +111,22 @@ export class AwsService {
     const uploadResults = await Promise.all(uploadPromises);
     return uploadResults.map((result) => result.url);
   }
+
+  async sendSms(phoneNumber: string, message: string): Promise<string> {
+    const params: AWS.SNS.PublishInput = {
+      Message: message,
+      PhoneNumber: phoneNumber,
+    };
+
+    try {
+      const result = await this.sns.publish(params).promise();
+      this.logger.log(
+        `SMS sent successfully to ${phoneNumber}. MessageId: ${result.MessageId}`,
+      );
+      return result.MessageId;
+    } catch (error) {
+      this.logger.error(`Error sending SMS to ${phoneNumber}`, error.stack);
+      throw error;
+    }
+  }
 }

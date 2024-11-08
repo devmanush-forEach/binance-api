@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { AwsService } from './aws.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadImageDto } from './dto/aws.dto';
+import { UploadImageDto, SendSmsDto } from './dto/aws.dto';
 
 @Controller('aws')
 export class AwsController {
@@ -46,5 +46,24 @@ export class AwsController {
       throw new BadRequestException('File is not provided');
     }
     return await this.awsService.uploadFile(file);
+  }
+
+  /**
+   * Endpoint to send an SMS message via AWS SNS.
+   * URL: POST /aws/send-sms
+   * Body: JSON with 'phoneNumber' and 'message'
+   */
+  @Post('send-sms')
+  async sendSms(
+    @Body() sendSmsDto: SendSmsDto,
+  ): Promise<{ messageId: string }> {
+    const { phoneNumber, message } = sendSmsDto;
+
+    try {
+      const messageId = await this.awsService.sendSms(phoneNumber, message);
+      return { messageId };
+    } catch (error) {
+      throw new BadRequestException('Failed to send SMS');
+    }
   }
 }
