@@ -8,22 +8,26 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const PORT = process.env.PORT || 3004;
 
-  const config = new DocumentBuilder()
-    .setTitle('Push Notification')
-    .setDescription(
-      'The API details of the business solution for the Push Notification Demo Application.',
-    )
-    .setVersion('1.0')
-    .addTag('Notification')
-    .addBearerAuth()
-    .build();
-
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   app.useGlobalFilters(new AllExceptionsFilter());
+  app.setGlobalPrefix('api');
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // Only set up Swagger if not in production
+  if (process.env.NODE_ENV === 'development') {
+    const config = new DocumentBuilder()
+      .setTitle('Push Notification')
+      .setDescription(
+        'The API details of the business solution for the Push Notification Demo Application.',
+      )
+      .setVersion('1.0')
+      .addTag('Notification')
+      .addBearerAuth()
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -41,6 +45,7 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
   });
+
   await app.listen(PORT);
 }
 bootstrap();
