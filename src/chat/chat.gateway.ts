@@ -11,7 +11,7 @@ import { AwsService } from 'src/aws/aws.service';
 import { NotificationService } from 'src/notification/notification.service';
 
 @WebSocketGateway({
-  namespace: '/chat',
+  namespace: '/socket/chat',
   cors: {
     origin: '*',
   },
