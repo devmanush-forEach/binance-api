@@ -87,7 +87,16 @@ export class UserService {
   }
 
   async findUserById(id: string): Promise<User | undefined> {
-    const data = await this.userModel.findById(id).lean().exec();
+    const data = await this.userModel
+      .findById(id)
+      .populate({
+        path: 'country',
+        populate: {
+          path: 'currency',
+        },
+      })
+      .lean()
+      .exec();
     return data;
   }
 
