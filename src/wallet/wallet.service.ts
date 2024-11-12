@@ -8,6 +8,7 @@ import { Model, Types } from 'mongoose';
 import { Wallet, WalletDocument } from './wallet.schema';
 import { WalletValue } from './crypto/crypto.schema';
 import { TransactionDocument } from 'src/transaction/transaction.schema';
+import { Coin } from 'src/coin/coin.schema';
 
 @Injectable()
 export class WalletService {
@@ -57,6 +58,24 @@ export class WalletService {
     );
 
     return walletValueWithCoin;
+  }
+
+  async getWalletBalanceinUsd(userId: string, coinId: string): Promise<number> {
+    const wallet = await this.walletModel
+      .findOne({ userId })
+      .select({ userId: 0 })
+      .lean()
+      .exec();
+
+    const walletValue = wallet?.walletValues.reduce((total, item: any) => {
+      const balance = item.balance;
+      const priceUSD = item.coin.price;
+      const valueInUSD = item.coin.currency.valueInUSD;
+      const valueInINR = balance * priceUSD * valueInUSD;
+      return total + valueInINR;
+    }, 0);
+
+    return walletValue;
   }
 
   async addCryptoToUserWallet(
