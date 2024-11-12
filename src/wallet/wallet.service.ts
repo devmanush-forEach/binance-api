@@ -60,22 +60,30 @@ export class WalletService {
     return walletValueWithCoin;
   }
 
-  async getWalletBalanceinUsd(userId: string, coinId: string): Promise<number> {
-    const wallet = await this.walletModel
-      .findOne({ userId })
-      .select({ userId: 0 })
-      .lean()
-      .exec();
+  async getWalletBalanceInUsd(userId: string): Promise<number> {
+    try {
+      const wallet = await this.walletModel
+        .findOne({ userId })
+        .populate({
+          path: 'walletValues.coin',
+          populate: {
+            path: 'currency',
+          },
+        })
+        .lean()
+        .exec();
 
-    const walletValue = wallet?.walletValues.reduce((total, item: any) => {
-      const balance = item.balance;
-      const priceUSD = item.coin.price;
-      const valueInUSD = item.coin.currency.valueInUSD;
-      const valueInINR = balance * priceUSD * valueInUSD;
-      return total + valueInINR;
-    }, 0);
-
-    return walletValue;
+      const walletValue = wallet?.walletValues.reduce((total, item: any) => {
+        const balance = +item.balance;
+        const priceUSD = +item.coin.price;
+        const valueInUSD = +item.coin.currency.valueInUSD;
+        const value = balance * priceUSD * valueInUSD;
+        return total + value;
+      }, 0);
+      return walletValue;
+    } catch (error) {
+      return 0;
+    }
   }
 
   async addCryptoToUserWallet(

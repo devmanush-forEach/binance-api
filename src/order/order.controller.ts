@@ -102,7 +102,9 @@ export class OrderController {
         'Please Enter A Valid Transaction Password!',
       );
     }
-    return this.orderService.create(createOrderDto);
+    const order = await this.orderService.create(createOrderDto);
+    console.log(order);
+    return order;
   }
 
   @Get('/by-user')

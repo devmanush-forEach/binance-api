@@ -27,6 +27,7 @@ import {
 } from 'src/user/dto/user.dto';
 import { JwtAuthGuard } from './gaurds/jwt-auth.gaurd';
 import { OTPService } from 'src/otp/otp.service';
+import { WalletService } from 'src/wallet/wallet.service';
 
 @Controller('auth')
 export class AuthController {
@@ -34,6 +35,7 @@ export class AuthController {
     private authService: AuthService,
     private userService: UserService,
     private otpService: OTPService,
+    private walletService: WalletService,
   ) {}
 
   @Get('jwt')
@@ -56,10 +58,15 @@ export class AuthController {
 
       const isTransactionPassword = !!transactionPassword;
       const data = { ...user, isTransactionPassword };
+      const walletBalance = await this.walletService.getWalletBalanceInUsd(
+        //@ts-ignore
+        data._id.toString(),
+      );
 
       return res.status(HttpStatus.OK).json({
         message: 'Token is valid',
         user: data,
+        walletBalanceInUsd: walletBalance,
       });
     } catch (error) {
       throw new HttpException(
@@ -118,7 +125,12 @@ export class AuthController {
       throw new UnauthorizedException('Invalid credentials');
     }
     const result = await this.authService.login(user, res);
-    return res.status(HttpStatus.OK).json(result);
+    const walletBalance = await this.walletService.getWalletBalanceInUsd(
+      result.user._id,
+    );
+    return res
+      .status(HttpStatus.OK)
+      .json({ ...result, walletBalanceInUsd: walletBalance });
   }
 
   @Patch('update-login-pass')

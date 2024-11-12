@@ -1,6 +1,10 @@
 // src/order/order.service.ts
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { Order, OrderDocument } from './order.schema';
@@ -119,9 +123,10 @@ export class OrderService {
           { title: 'New Order Created' },
         );
       }
+      console.log(order);
       return order;
     } catch (error) {
-      console.log(JSON.stringify(error));
+      throw new BadRequestException(error.message);
     }
   }
 
