@@ -216,6 +216,7 @@ export class AdvertisementService {
       coinId?: string;
       status?: 'online' | 'offline';
       dateRange?: DateRange;
+      currency?: string;
     },
     page: number = 1,
     limit: number = 10,
@@ -227,6 +228,9 @@ export class AdvertisementService {
     }
     if (filters.coinId && filters.coinId.trim() !== '') {
       queryFilter.coinId = filters.coinId;
+    }
+    if (filters.currency && filters.currency.trim() !== '') {
+      queryFilter.currency = filters.currency;
     }
 
     if (

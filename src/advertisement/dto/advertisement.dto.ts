@@ -220,6 +220,10 @@ export class GetAdvertisementsDto {
   coinId?: string;
 
   @IsOptional()
+  @IsString()
+  currency?: string;
+
+  @IsOptional()
   @Min(1)
   page?: number = 1;
 

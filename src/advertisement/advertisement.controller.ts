@@ -112,9 +112,9 @@ export class AdvertisementController {
     @Param('userId') userId: string,
     @Query() query: GetAdvertisementsDto,
   ) {
-    const { adType, coinId, page, limit, status, dateRange } = query;
+    const { adType, coinId, page, limit, status, dateRange, currency } = query;
     return this.advertisementService.findAllAdsForUser(
-      { adType, coinId, requestUserId: userId, status, dateRange },
+      { adType, coinId, requestUserId: userId, status, dateRange, currency },
       page,
       limit,
     );
