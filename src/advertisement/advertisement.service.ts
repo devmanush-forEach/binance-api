@@ -232,6 +232,9 @@ export class AdvertisementService {
     if (filters.currency && filters.currency.trim() !== '') {
       queryFilter.currency = filters.currency;
     }
+    if (filters.status && filters.status.trim() !== '') {
+      queryFilter.isOnline = filters.status === 'online' ? true : false;
+    }
 
     if (
       filters.dateRange &&
@@ -284,6 +287,7 @@ export class AdvertisementService {
         userId,
         coinId,
       );
+
       if (ad.adType === 'sell' && walletValue?.balance < 1) {
         throw new Error('Not have enough coin in Wallet');
       } else {

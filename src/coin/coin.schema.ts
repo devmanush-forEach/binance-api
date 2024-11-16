@@ -37,21 +37,21 @@ export class Coin {
   @Prop({ required: true })
   iconUrl: string;
 
-  @Prop({
-    type: [
-      {
-        networkId: { type: Types.ObjectId, ref: Network.name, required: true },
-        minDeposit: { type: Number, required: true },
-        minWithdrawal: { type: Number, required: true },
-      },
-    ],
-    required: true,
-  })
-  networks: {
-    networkId: Types.ObjectId;
-    minDeposit: number;
-    minWithdrawal: number;
-  }[];
+  // @Prop({
+  //   type: [
+  //     {
+  //       networkId: { type: Types.ObjectId, ref: Network.name, required: true },
+  //       minDeposit: { type: Number, required: true },
+  //       minWithdrawal: { type: Number, required: true },
+  //     },
+  //   ],
+  //   required: true,
+  // })
+  // networks: {
+  //   networkId: Types.ObjectId;
+  //   minDeposit: number;
+  //   minWithdrawal: number;
+  // }[];
 }
 
 export const CoinSchema = SchemaFactory.createForClass(Coin);

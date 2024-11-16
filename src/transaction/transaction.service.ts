@@ -178,37 +178,37 @@ export class TransactionService {
   async searchAdminTransactions(filters: SearchTransactionsDto): Promise<any> {
     const query: any = {};
 
-    if (filters.user) {
-      query.user = filters.user;
-    }
+    // if (filters.user) {
+    //   query.user = filters.user;
+    // }
 
-    if (filters.coin) {
-      query.coin = filters.coin;
-    }
+    // if (filters.coin) {
+    //   query.coin = filters.coin;
+    // }
 
-    if (filters.transactionType) {
-      query.transactionType = filters.transactionType;
-    }
+    // if (filters.transactionType) {
+    //   query.transactionType = filters.transactionType;
+    // }
 
     if (filters.status) {
       query.status = filters.status;
     }
 
-    if (filters.network) {
-      query.network = filters.network;
-    }
+    // if (filters.network) {
+    //   query.network = filters.network;
+    // }
 
-    if (filters.transactionId) {
-      query.transactionId = filters.transactionId;
-    }
+    // if (filters.transactionId) {
+    //   query.transactionId = filters.transactionId;
+    // }
 
-    if (filters.withdrawAddress) {
-      query.withdrawAddress = filters.withdrawAddress;
-    }
+    // if (filters.withdrawAddress) {
+    //   query.withdrawAddress = filters.withdrawAddress;
+    // }
 
-    if (filters.depositAddress) {
-      query.depositAddress = filters.depositAddress;
-    }
+    // if (filters.depositAddress) {
+    //   query.depositAddress = filters.depositAddress;
+    // }
 
     const page = filters.page || 1;
     const limit = filters.limit || 10;
@@ -243,6 +243,7 @@ export class TransactionService {
       return acc;
     }, {});
 
+    console.log(results);
     return {
       transactions: results,
       total,
@@ -411,7 +412,7 @@ export class TransactionService {
         transaction.status = 'completed';
         if (transaction) {
           this.notificationService.sendNotificationByUserId(userId.toString(), {
-            title: `Transaction Compketed`,
+            title: `Transaction Completed`,
           });
         }
         await transaction.save();
