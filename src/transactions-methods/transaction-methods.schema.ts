@@ -21,8 +21,11 @@ export class TransactionMethods {
   @Prop([{ type: Types.ObjectId, ref: Currency.name, required: true }])
   supportedCurrencies: Types.ObjectId[];
 
-  @Prop({ required: false, default: true })
+  @Prop({ required: false, default: false })
   isUniversal: boolean;
+
+  @Prop({ required: false, default: true })
+  isActive: boolean;
 }
 
 export const TransactionMethodsSchema =
