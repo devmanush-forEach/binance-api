@@ -21,10 +21,10 @@ export class CoinService {
       .find()
       .populate([
         'currency',
-        {
-          path: 'networks.networkId',
-          model: 'Network',
-        },
+        // {
+        //   path: 'networks.networkId',
+        //   model: 'Network',
+        // },
       ])
       .exec();
   }
