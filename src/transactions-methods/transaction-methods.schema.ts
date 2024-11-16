@@ -12,7 +12,7 @@ export class TransactionMethods {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, enum: ['BANK', 'UPI'] })
   type: string;
 
   @Prop({ required: true })
@@ -20,6 +20,9 @@ export class TransactionMethods {
 
   @Prop([{ type: Types.ObjectId, ref: Currency.name, required: true }])
   supportedCurrencies: Types.ObjectId[];
+
+  @Prop({ required: false, default: true })
+  isUniversal: boolean;
 }
 
 export const TransactionMethodsSchema =
