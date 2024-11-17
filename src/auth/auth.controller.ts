@@ -86,6 +86,7 @@ export class AuthController {
     if (!otpVerified) {
       throw new BadRequestException('Entered Wrong OTP!');
     }
+    console.log(111, body);
 
     return this.userService.createUser(body);
   }

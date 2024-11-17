@@ -167,7 +167,14 @@ export class AdvertisementService {
         },
         'transactionMethods',
         'currency',
-        'coinId',
+        {
+          path: 'coinId',
+          populate: {
+            path: 'currency',
+            model: 'Currency',
+          },
+        },
+        ,
         {
           path: 'userId',
           select: 'username email',
@@ -262,7 +269,13 @@ export class AdvertisementService {
         },
         'transactionMethods',
         'currency',
-        'coinId',
+        {
+          path: 'coinId',
+          populate: {
+            path: 'currency',
+            model: 'Currency',
+          },
+        },
         {
           path: 'userId',
           select: 'username email',

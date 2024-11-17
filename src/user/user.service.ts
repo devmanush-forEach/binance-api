@@ -1,5 +1,9 @@
 // src/user/user.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
@@ -32,13 +36,19 @@ export class UserService {
       password: hashedPassword,
       emailVerified: true,
     };
-    const newUser = new this.userModel(userBody);
-    const userData = await newUser.save();
-    const userId = userData._id;
-    if (userId) {
-      await this.walletService.createWallet(userId as string);
+
+    try {
+      const newUser = new this.userModel(userBody);
+      const userData = await newUser.save();
+      const userId = userData._id;
+      if (userId) {
+        await this.walletService.createWallet(userId as string);
+      }
+      return userData;
+    } catch (error) {
+      console.log(error);
+      if (error) throw new BadRequestException('Mail already registered!');
     }
-    return userData;
   }
 
   async findUserByPhone(phone: string): Promise<User | undefined> {

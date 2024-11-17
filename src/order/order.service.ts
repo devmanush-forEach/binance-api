@@ -453,7 +453,16 @@ export class OrderService {
     }
 
     orderDetails.status = 'completed';
-    const order = orderDetails.save();
+    const order = await orderDetails.save();
+
+    if (order) {
+      this.notificationService.sendNotificationByUserId(
+        order.advertiser._id.toString(),
+        {
+          title: `Crypto released for Order No. ${order.orderNo}`,
+        },
+      );
+    }
 
     this.notificationService.sendNotificationByUserId(buyerId, {
       title: `OrderNo ${orderDetails.orderNo} successfully completed`,

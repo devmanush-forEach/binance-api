@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   TransactionMethods,
   TransactionMethodsDocument,
@@ -24,6 +24,15 @@ export class TransactionMethodsService {
 
   async findAll(): Promise<TransactionMethods[]> {
     return this.transactionMethodsModel.find().lean().exec();
+  }
+  async findCurrencyMethods(currency: string): Promise<TransactionMethods[]> {
+    const id = new Types.ObjectId(currency);
+    return this.transactionMethodsModel
+      .find({
+        $or: [{ isUniversal: true }, { supportedCurrencies: { $in: [id] } }],
+      })
+      .lean()
+      .exec();
   }
 
   async findOne(id: string): Promise<TransactionMethods> {
