@@ -33,7 +33,9 @@ export class PaymentServicesService {
         transactionMethodId,
       });
       console.log(createdPaymentService);
-      const response = await createdPaymentService.save();
+      const response = (await createdPaymentService.save()).populate(
+        'transactionMethodId',
+      );
       console.log(response);
       return response;
     } catch (error) {

@@ -8,7 +8,7 @@ import {
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
-  namespace: '/notifications',
+  namespace: '/api/socket/notifications',
   cors: {
     origin: '*',
   },

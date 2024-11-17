@@ -1,17 +1,14 @@
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsMongoId,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class DepositDto {
   @IsString()
   @IsNotEmpty()
   coinId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  coinWallet: string;
 
   @IsString()
   @IsNotEmpty()
@@ -24,16 +21,16 @@ export class DepositDto {
   @IsString()
   @IsNotEmpty()
   transactionId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  depositAddress: string;
 }
 
 export class WithdrawalDto {
   @IsString()
   @IsNotEmpty()
   coinId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  coinWallet: string;
 
   @IsString()
   @IsNotEmpty()

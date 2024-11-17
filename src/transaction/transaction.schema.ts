@@ -3,6 +3,7 @@ import { Document, Types } from 'mongoose';
 import { User } from 'src/user/user.schema';
 import { Network } from 'src/network/network.schema';
 import { Coin } from 'src/coin/coin.schema';
+import { CoinWallet } from 'src/coinWallet/coinWallet.schema';
 
 export type TransactionDocument = Transaction & Document;
 
@@ -17,11 +18,11 @@ export class Transaction {
   @Prop({ required: false })
   withdrawAddress: string;
 
-  @Prop({ required: false })
-  depositAddress: string;
-
   @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   user: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: CoinWallet.name, required: true })
+  coinWallet: Types.ObjectId;
 
   @Prop({ required: true })
   amount: number;

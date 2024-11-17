@@ -48,7 +48,7 @@ export class TransactionService {
   async findAll(): Promise<Transaction[]> {
     return this.transactionModel
       .find()
-      .populate(['coin', 'user', 'network'])
+      .populate(['coin', 'user', 'network', 'coinWallet'])
       .exec();
   }
 
@@ -96,7 +96,7 @@ export class TransactionService {
         .find(query)
         .skip(skip)
         .limit(limit)
-        .populate(['coin', 'user', 'network'])
+        .populate(['coin', 'user', 'network', 'coinWallet'])
         .exec(),
       this.transactionModel.countDocuments(query),
       this.transactionModel.aggregate([
@@ -144,7 +144,7 @@ export class TransactionService {
         .find(query)
         .skip(skip)
         .limit(limit)
-        .populate(['coin', 'user', 'network'])
+        .populate(['coin', 'user', 'network', 'coinWallet'])
         .exec(),
       this.transactionModel.countDocuments(query),
       this.transactionModel.aggregate([
@@ -219,7 +219,7 @@ export class TransactionService {
         .find(query)
         .skip(skip)
         .limit(limit)
-        .populate(['coin', 'user', 'network'])
+        .populate(['coin', 'user', 'network', 'coinWallet'])
         .exec(),
       this.transactionModel.countDocuments(query),
       this.transactionModel.aggregate([
@@ -243,7 +243,6 @@ export class TransactionService {
       return acc;
     }, {});
 
-    console.log(results);
     return {
       transactions: results,
       total,
@@ -258,7 +257,7 @@ export class TransactionService {
   async findOne(id: string): Promise<Transaction> {
     const transaction = await this.transactionModel
       .findById(id)
-      .populate(['coin', 'user', 'network'])
+      .populate(['coin', 'user', 'network', 'coinWallet'])
       .exec();
     if (!transaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
@@ -268,11 +267,11 @@ export class TransactionService {
 
   async deposit(userId: string, depositDto: DepositDto) {
     try {
-      const { coinId, networkId, amount, transactionId, depositAddress } =
+      const { coinId, networkId, amount, transactionId, coinWallet } =
         depositDto;
       const transaction = new this.transactionModel({
         transactionId,
-        depositAddress,
+        coinWallet,
         amount,
         user: userId,
         transactionType: 'credit',
@@ -365,7 +364,7 @@ export class TransactionService {
           const value: WalletValue = {
             coin: cId,
             balance: transactionAmount,
-            address: 'kgjhd ghdfgk jdfshgdfh gdfgh dgh',
+            address: uuidv4().replace(/-/g, ''),
           };
           newWallet.walletValues = walletValues;
           newWallet.save();
@@ -388,12 +387,20 @@ export class TransactionService {
           } else {
             walletValues.push({
               coin: coinId,
-              address: 'dkjfh skldjfh askdfj h',
+              address: uuidv4().replace(/-/g, ''),
               balance: transactionAmount,
             });
           }
 
           wallet.walletValues = walletValues;
+
+          console.log(
+            '11111111111111111---------------------------------------',
+          );
+          console.log(walletValues);
+          console.log(
+            '11111111111111111---------------------------------------',
+          );
           wallet.save();
         }
         transaction.status = 'completed';
@@ -468,7 +475,7 @@ export class TransactionService {
   async update(id: string, updateTransactionDto: any): Promise<Transaction> {
     const updatedTransaction = await this.transactionModel
       .findByIdAndUpdate(id, updateTransactionDto, { new: true })
-      .populate(['coin', 'user', 'network'])
+      .populate(['coin', 'user', 'network', 'coinWallet'])
       .exec();
     if (!updatedTransaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);

@@ -24,6 +24,7 @@ import awsConfig from './config/aws.config';
 import { AwsModule } from './aws/aws.module';
 import { NotificationModule } from './notification/notification.module';
 import { OTPModule } from './otp/otp.module';
+import { CoinWalletModule } from './coinWallet/coinWallet.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { OTPModule } from './otp/otp.module';
     AwsModule,
     NotificationModule,
     OTPModule,
+    CoinWalletModule,
   ],
   controllers: [AppController],
   providers: [AppService],
