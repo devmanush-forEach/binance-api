@@ -19,6 +19,11 @@ export class NetworkController {
     return this.networkService.create(createNetworkDto);
   }
 
+  @Post('add-many')
+  addMany(@Body() createNetworkDtos: CreateNetworkDto[]) {
+    return this.networkService.addMany(createNetworkDtos);
+  }
+
   @Get()
   findAll() {
     return this.networkService.findAll();

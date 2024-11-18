@@ -22,14 +22,14 @@ export class CoinWallet {
   @Prop({ type: Number, required: true })
   minWithdrawal: number;
 
+  @Prop({ type: String, required: true })
+  walletAddress: string;
+
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
 
   @Prop({ type: Boolean, default: false })
   isDeleted: boolean;
-
-  @Prop({ type: String, required: true })
-  walletAddress: string;
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;

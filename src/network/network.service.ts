@@ -15,6 +15,10 @@ export class NetworkService {
     return createdNetwork.save();
   }
 
+  async addMany(createNetworkDtos: CreateNetworkDto[]): Promise<Network[]> {
+    return this.networkModel.insertMany(createNetworkDtos);
+  }
+
   async findAll(): Promise<Network[]> {
     return this.networkModel.find().exec();
   }

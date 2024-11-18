@@ -14,24 +14,24 @@ export class Network {
   @Prop({ required: true })
   code: string;
 
-  @Prop({ required: true, enum: ['ERC20', 'TRC20', 'BEP20', 'Others'] })
+  @Prop({ required: false, type: String })
   networkProtocol: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   confirmationsRequired: number;
 
   @Prop({ required: true })
-  icon: string;
+  blockConfirmations: number;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   averageConfirmationTime: number;
 
   @Prop({
     type: {
-      transferSpeed: { type: Number, required: true },
-      confirmationSpeed: { type: Number, required: true },
+      transferSpeed: { type: Number, required: false },
+      confirmationSpeed: { type: Number, required: false },
     },
-    required: true,
+    required: false,
   })
   deposit: {
     transferSpeed: number;
@@ -42,11 +42,13 @@ export class Network {
     type: {
       speeds: { type: Number, required: true },
     },
-    required: true,
+    required: false,
   })
   withdraw: {
     speeds: number;
   };
+  @Prop({ default: true })
+  isActive: boolean;
 }
 
 export const NetworkSchema = SchemaFactory.createForClass(Network);

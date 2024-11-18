@@ -10,6 +10,7 @@ import {
   Min,
   IsUrl,
   ValidateNested,
+  IsOptional,
 } from 'class-validator';
 
 export class Deposit {
@@ -37,25 +38,30 @@ export class CreateNetworkDto {
   @IsNotEmpty()
   code: string;
 
+  @IsOptional()
   @IsString()
-  @IsIn(['ERC20', 'TRC20', 'BEP20', 'Others'])
   networkProtocol: string;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   confirmationsRequired: number;
 
-  @IsUrl()
-  icon: string;
+  @IsInt()
+  @Min(1)
+  blockConfirmations: number;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   averageConfirmationTime: number;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => Deposit)
   deposit: Deposit;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => Withdraw)
   withdraw: Withdraw;

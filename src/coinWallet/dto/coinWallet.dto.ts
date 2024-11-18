@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsNumber,
   IsMongoId,
+  IsOptional,
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 
@@ -28,9 +29,11 @@ export class CreateCoinWalletDto {
   @IsNotEmpty()
   walletAddress: string;
 
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
+  @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;
 }
