@@ -18,6 +18,9 @@ export class Currency {
   symbol: string;
 
   @Prop({ required: true })
+  iconUrl: string;
+
+  @Prop({ required: true })
   valueInUSD: number;
 }
 

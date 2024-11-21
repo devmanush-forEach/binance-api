@@ -25,6 +25,10 @@ export class CreateCountryDto {
   @IsNotEmpty()
   isoCode: string;
 
+  @IsString()
+  @IsNotEmpty()
+  flag: string;
+
   @IsNotEmpty()
   currency: Types.ObjectId;
 

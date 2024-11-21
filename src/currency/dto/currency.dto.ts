@@ -13,6 +13,10 @@ export class CreateCurrencyDto {
   @IsNotEmpty()
   symbol: string;
 
+  @IsString()
+  @IsNotEmpty()
+  iconUrl: string;
+
   @IsNumber()
   @IsNotEmpty()
   valueInUSD: number;

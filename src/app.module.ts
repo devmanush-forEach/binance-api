@@ -25,6 +25,7 @@ import { AwsModule } from './aws/aws.module';
 import { NotificationModule } from './notification/notification.module';
 import { OTPModule } from './otp/otp.module';
 import { CoinWalletModule } from './coinWallet/coinWallet.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { CoinWalletModule } from './coinWallet/coinWallet.module';
     NotificationModule,
     OTPModule,
     CoinWalletModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

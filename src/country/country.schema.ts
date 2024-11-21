@@ -19,6 +19,9 @@ export class Country extends Document {
   @Prop({ type: Types.ObjectId, ref: Currency.name, required: true })
   currency: Types.ObjectId;
 
+  @Prop({ required: true })
+  flag: string;
+
   @Prop({ default: true })
   isActive: boolean;
 }

@@ -8,7 +8,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { CurrencyService } from './currency.service';
-import { CreateCurrencyDto, UpdateCurrencyDto } from './currency.dto';
+import { CreateCurrencyDto, UpdateCurrencyDto } from './dto/currency.dto';
 
 @Controller('currency')
 export class CurrencyController {

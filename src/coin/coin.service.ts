@@ -17,16 +17,28 @@ export class CoinService {
   }
 
   async findAll(): Promise<Coin[]> {
-    return this.coinModel
-      .find()
-      .populate([
-        'currency',
-        // {
-        //   path: 'networks.networkId',
-        //   model: 'Network',
-        // },
-      ])
-      .exec();
+    const primary = ['USDT', 'BTC', 'ETH', 'BNB', 'TRX'];
+
+    const coins = await this.coinModel.find().populate(['currency']).exec();
+
+    const sortedCoins = coins.sort((a, b) => {
+      const indexA = primary.indexOf(a.symbol);
+      const indexB = primary.indexOf(b.symbol);
+
+      // If both are in primary, sort by their order in the primary array
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+
+      // If one is in primary, it comes first
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+
+      // If neither is in primary, sort alphabetically by name
+      return a.name.localeCompare(b.name);
+    });
+
+    return sortedCoins;
   }
 
   async findOne(id: string): Promise<Coin> {

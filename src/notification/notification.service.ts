@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { FirebaseService } from 'src/config/firebase.config';
 import { NotificationDto, SaveTokenDto } from './dto/notification.dto';
 import { UserService } from 'src/user/user.service';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Notification } from './notification.schema';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class NotificationService {

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Currency, CurrencyDocument } from './currency.schema';
-import { CreateCurrencyDto, UpdateCurrencyDto } from './currency.dto';
+import { CreateCurrencyDto, UpdateCurrencyDto } from './dto/currency.dto';
 
 @Injectable()
 export class CurrencyService {
@@ -16,7 +16,7 @@ export class CurrencyService {
   }
 
   async findAll(): Promise<Currency[]> {
-    return this.currencyModel.find().exec();
+    return this.currencyModel.find().sort({ name: 1 }).exec();
   }
 
   async findOne(id: string): Promise<Currency> {

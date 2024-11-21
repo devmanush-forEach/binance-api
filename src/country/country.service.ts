@@ -16,7 +16,11 @@ export class CountryService {
   }
 
   async findAll(): Promise<Country[]> {
-    return this.countryModel.find().populate('currency').exec();
+    return this.countryModel
+      .find()
+      .sort({ name: 1 })
+      .populate('currency')
+      .exec();
   }
 
   async findOne(id: string): Promise<Country> {
