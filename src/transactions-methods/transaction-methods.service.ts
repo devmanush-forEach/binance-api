@@ -5,6 +5,10 @@ import {
   TransactionMethods,
   TransactionMethodsDocument,
 } from './transaction-methods.schema';
+import {
+  CreateTransactionMethodsDto,
+  UpdateTransactionMethodsDto,
+} from './dto/transaction-methods.dto';
 
 @Injectable()
 export class TransactionMethodsService {
@@ -14,7 +18,7 @@ export class TransactionMethodsService {
   ) {}
 
   async create(
-    createTransactionMethodDto: TransactionMethods,
+    createTransactionMethodDto: CreateTransactionMethodsDto,
   ): Promise<TransactionMethods> {
     const createdMethod = new this.transactionMethodsModel(
       createTransactionMethodDto,
@@ -47,7 +51,7 @@ export class TransactionMethodsService {
 
   async update(
     id: string,
-    updateData: Partial<TransactionMethods>,
+    updateData: Partial<UpdateTransactionMethodsDto>,
   ): Promise<TransactionMethods> {
     const updatedMethod = await this.transactionMethodsModel
       .findByIdAndUpdate(id, updateData, { new: true })

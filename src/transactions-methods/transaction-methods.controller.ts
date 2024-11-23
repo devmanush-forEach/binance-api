@@ -10,6 +10,10 @@ import {
 } from '@nestjs/common';
 import { TransactionMethodsService } from './transaction-methods.service';
 import { TransactionMethods } from './transaction-methods.schema';
+import {
+  CreateTransactionMethodsDto,
+  UpdateTransactionMethodsDto,
+} from './dto/transaction-methods.dto';
 
 @Controller('transaction-methods')
 export class TransactionMethodsController {
@@ -18,7 +22,7 @@ export class TransactionMethodsController {
   ) {}
 
   @Post()
-  create(@Body() createTransactionMethodDto: TransactionMethods) {
+  create(@Body() createTransactionMethodDto: CreateTransactionMethodsDto) {
     return this.transactionMethodsService.create(createTransactionMethodDto);
   }
 
@@ -39,7 +43,7 @@ export class TransactionMethodsController {
   @Put(':id')
   update(
     @Param('id') id: string,
-    @Body() updateData: Partial<TransactionMethods>,
+    @Body() updateData: Partial<UpdateTransactionMethodsDto>,
   ) {
     return this.transactionMethodsService.update(id, updateData);
   }
