@@ -40,7 +40,6 @@ export class NotificationsGateway
   }
 
   sendDepositRequestNotification(depositData: any) {
-    console.log('90000000000000000000000000000');
     this.server.emit('newDepositRequest', depositData);
   }
 }

@@ -393,17 +393,11 @@ export class TransactionService {
           }
 
           wallet.walletValues = walletValues;
-
-          console.log(
-            '11111111111111111---------------------------------------',
-          );
-          console.log(walletValues);
-          console.log(
-            '11111111111111111---------------------------------------',
-          );
           wallet.save();
         }
         transaction.status = 'completed';
+        try {
+        } catch (error) {}
         if (transaction) {
           this.notificationService.sendNotificationByUserId(userId.toString(), {
             title: `Transaction Compketed`,

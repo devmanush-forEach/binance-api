@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { NotificationDto, SaveTokenDto } from './dto/notification.dto';
 import { UserService } from 'src/user/user.service';
 import { Model } from 'mongoose';
@@ -37,11 +37,11 @@ export class NotificationService {
     const existingNotification = await this.notificationModel.findOne({
       userId,
     });
-    if (!existingNotification) throw new Error('No Token Found!');
+    if (!existingNotification) return;
 
     const tokens: string[] = existingNotification.fcmToken;
 
-    if (!tokens?.length) throw new Error('No Token Found!');
+    if (!tokens?.length) return;
     try {
       for (let token of tokens) {
         const response = await messaging.send({
@@ -63,7 +63,7 @@ export class NotificationService {
     const { token } = saveTokenDto;
 
     const user = await this.userService.findUserById(userId);
-    if (!user) throw new Error('User Not found');
+    if (!user) throw new BadRequestException('Validation Error !');
 
     const existingNotification = await this.notificationModel.findOne({
       userId,

@@ -38,7 +38,6 @@ export class FirebaseService {
     file: { buffer: ArrayBuffer; mimetype: string; originalname: string },
     folderName: string,
   ): Promise<string> {
-    const fileExtension = file.originalname?.split('.').pop();
     const uniqueFileName = `${folderName}/${Date.now()}-${file.originalname}`;
 
     try {
@@ -53,15 +52,11 @@ export class FirebaseService {
           cacheControl: 'public',
         },
       });
-
-      console.log(x);
-
-      this.logger.log(`File uploaded to Firebase: ${uniqueFileName}`);
+      await firebaseFile.makePublic();
 
       // Generate the public URL after the file is uploaded
       const publicUrl = `https://storage.googleapis.com/${process.env.FIREBASE_STORAGE_BUCKET}/${uniqueFileName}`;
 
-      this.logger.log(`Public download URL generated: ${publicUrl}`);
       return publicUrl;
     } catch (error) {
       this.logger.error(

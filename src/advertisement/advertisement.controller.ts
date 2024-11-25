@@ -89,7 +89,7 @@ export class AdvertisementController {
       limit,
       paymentMethods,
       priceRange,
-      region,
+      regions,
     } = query;
     return this.advertisementService.searchAdvertisements(
       {
@@ -99,7 +99,7 @@ export class AdvertisementController {
         paymentMethods,
         requestUserId: params.userId,
         priceRange,
-        region,
+        regions,
       },
       page,
       limit,

@@ -264,8 +264,9 @@ export class SearchAdvertisementsDto {
   currency?: string;
 
   @IsOptional()
-  @IsString()
-  region?: string;
+  @IsArray()
+  @IsString({ each: true })
+  regions?: string[];
 
   @IsOptional()
   @IsNumber()

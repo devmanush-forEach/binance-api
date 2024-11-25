@@ -110,7 +110,7 @@ export class AdvertisementService {
       currency?: string;
       priceRange?: number;
       paymentMethods?: string[];
-      region?: string;
+      regions?: string[];
     },
     page: number = 1,
     limit: number = 10,
@@ -145,10 +145,10 @@ export class AdvertisementService {
         $elemMatch: { $in: filters.paymentMethods },
       };
     }
-    if (filters?.region && filters.region.trim() !== '') {
+    if (filters?.regions && filters.regions.length) {
       queryFilter.$or = [
         { allRegions: true },
-        { regions: { $in: [filters.region] } },
+        { regions: { $in: filters.regions } },
       ];
     }
 
