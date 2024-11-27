@@ -19,6 +19,7 @@ export class NotificationController {
     @Param('userId') userId: string,
     @Body() saveTokenDto: SaveTokenDto,
   ) {
+    console.log(userId, saveTokenDto);
     return this.notificationService.saveFcmToken(userId, saveTokenDto);
   }
 }
