@@ -21,6 +21,7 @@ import {
   UpdatePaymentServicesDto,
 } from './payment-services/dto/payment-services.dto';
 import { Types } from 'mongoose';
+import { Wallet } from 'src/wallet/wallet.schema';
 
 @Controller('users')
 export class UserController {
@@ -55,6 +56,14 @@ export class UserController {
   // @UseGuards(JwtAuthGuard)
   async getUser(@Param('email') email: string): Promise<User> {
     return this.userService.findUserByEmail(email);
+  }
+
+  @Get('/detailed/:id')
+  // @UseGuards(JwtAuthGuard)
+  async getUserWithWallet(
+    @Param('id') id: string,
+  ): Promise<{ user: User; wallet: Wallet | null }> {
+    return this.userService.getDetailedUser(id);
   }
 
   @Put(':id')

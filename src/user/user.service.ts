@@ -17,6 +17,7 @@ import {
   CreateUserDto,
   UpdateUserDto,
 } from './dto/user.dto';
+import { Wallet } from 'src/wallet/wallet.schema';
 
 @Injectable()
 export class UserService {
@@ -94,6 +95,20 @@ export class UserService {
 
   async findUserByEmail(email: string): Promise<User | undefined> {
     return this.userModel.findOne({ email }).lean().exec();
+  }
+
+  async getDetailedUser(
+    id: string,
+  ): Promise<{ user: User; wallet: Wallet | null }> {
+    const user = await this.userModel
+      .findById(id)
+      .populate('country')
+      .lean()
+      .exec();
+
+    const wallet = await this.walletService.getWalletByUserId(id);
+
+    return { user, wallet: wallet || null };
   }
 
   async findUserById(id: string): Promise<User | undefined> {
