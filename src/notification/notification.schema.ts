@@ -7,7 +7,7 @@ export class Notification extends Document {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
-  @Prop({ type: [String], required: true, unique: true })
+  @Prop({ type: [String], required: true })
   fcmToken: string[];
 
   @Prop({ default: true })

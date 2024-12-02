@@ -26,9 +26,11 @@ import { NotificationModule } from './notification/notification.module';
 import { OTPModule } from './otp/otp.module';
 import { CoinWalletModule } from './coinWallet/coinWallet.module';
 import { FileModule } from './file/file.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

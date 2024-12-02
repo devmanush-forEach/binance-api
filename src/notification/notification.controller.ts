@@ -13,6 +13,13 @@ export class NotificationController {
     const payload = { title, body: messageBody, data };
     return this.notificationService.sendNotificationByToken(token, payload);
   }
+
+  @Post('user')
+  async sendUserNotification(@Body() body: any) {
+    const { userId, title, body: messageBody, data } = body;
+    const payload = { title, body: messageBody, data };
+    return this.notificationService.sendNotificationByUserId(userId, payload);
+  }
   @Post('save')
   @UseGuards(JwtAuthGuard)
   async token(

@@ -69,14 +69,21 @@ export class NotificationService {
       userId,
     });
 
-    if (existingNotification) {
-      if (!existingNotification.fcmToken.includes(token)) {
-        await this.notificationModel.updateOne(
-          { userId },
-          { $push: { fcmToken: token } },
-        );
+    try {
+      if (existingNotification) {
+        if (!existingNotification.fcmToken.includes(token)) {
+          await this.notificationModel.updateOne(
+            { userId },
+            { $push: { fcmToken: token } },
+          );
+        }
+        return existingNotification;
       }
-      return existingNotification;
+    } catch (error) {
+      return {
+        success: false,
+        error,
+      };
     }
 
     const newNotification = new this.notificationModel({

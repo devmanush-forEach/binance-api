@@ -43,6 +43,10 @@ export class OrderService {
     private readonly chatGateway: ChatGateway,
   ) {}
 
+  async getPendingOrders(): Promise<Order[]> {
+    return this.orderModel.find({ status: 'pending' }).populate(['ad']).exec();
+  }
+
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
     const orderNo = await this.counterService.getNextOrderNo();
     if (!orderNo) throw new Error('No Order No. present');
@@ -392,6 +396,18 @@ export class OrderService {
     if (order) {
       this.notificationService.sendNotificationByUserId(
         order.advertiser._id.toString(),
+        {
+          title: `Order ${order.orderNo}  is cancelled by ${cancelOrderDto.cancelledBy}`,
+        },
+      );
+      this.notificationService.sendNotificationByUserId(
+        order.advertiser._id.toString(),
+        {
+          title: `Order ${order.orderNo}  is cancelled by ${cancelOrderDto.cancelledBy}`,
+        },
+      );
+      this.notificationService.sendNotificationByUserId(
+        order.user._id.toString(),
         {
           title: `Order ${order.orderNo}  is cancelled by ${cancelOrderDto.cancelledBy}`,
         },

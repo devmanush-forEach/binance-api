@@ -32,7 +32,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (typeof userId === 'string') {
       this.userSockets.set(userId, client.id);
     }
-    console.log(`Client connected: ${client.id}`);
+    console.log(`Client ${userId} connected: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {

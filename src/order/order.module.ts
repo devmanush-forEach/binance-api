@@ -19,6 +19,7 @@ import { OrderNotificationService } from './orderNotification/orderNotification.
 import { AwsModule } from 'src/aws/aws.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { WalletModule } from 'src/wallet/wallet.module';
+import { OrderCronService } from './order.cronservice';
 
 @Module({
   imports: [
@@ -37,6 +38,6 @@ import { WalletModule } from 'src/wallet/wallet.module';
     WalletModule,
   ],
   controllers: [OrderController],
-  providers: [OrderService, OrderNotificationService],
+  providers: [OrderService, OrderNotificationService, OrderCronService],
 })
 export class OrderModule {}
