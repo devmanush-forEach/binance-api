@@ -14,6 +14,10 @@ export class CreateCoinWalletDto {
   coinId: string;
 
   @IsMongoId()
+  @IsOptional()
+  user?: string;
+
+  @IsMongoId()
   @IsNotEmpty()
   networkId: string;
 
@@ -32,6 +36,14 @@ export class CreateCoinWalletDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isAssigned?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isGlobal?: boolean;
 
   @IsOptional()
   @IsBoolean()

@@ -4,11 +4,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { Wallet, WalletDocument } from './wallet.schema';
 import { WalletValue } from './crypto/crypto.schema';
 import { TransactionDocument } from 'src/transaction/transaction.schema';
-import { Coin } from 'src/coin/coin.schema';
+import { CoinWalletService } from 'src/coinWallet/coinWallet.service';
+import {
+  CoinWallet,
+  CoinWalletDocument,
+} from 'src/coinWallet/coinWallet.schema';
 
 @Injectable()
 export class WalletService {
@@ -90,10 +94,16 @@ export class WalletService {
     userId: string,
     coinId: string,
     amount: number,
+    coinWallet?: string,
   ): Promise<Wallet> {
     const wallet = await this.walletModel.findOne({
       userId,
     });
+    const cObjectIdId = new Types.ObjectId(coinId);
+    let cWalletObjectId: Types.ObjectId;
+    if (coinWallet) {
+      cWalletObjectId = new Types.ObjectId(coinWallet);
+    }
 
     if (!wallet) {
       const newWallet = new this.walletModel({
@@ -101,12 +111,10 @@ export class WalletService {
         walletValues: [],
       });
       const walletValues = newWallet.walletValues || [];
-      const cId = new Types.ObjectId(coinId);
-      const value: WalletValue = {
-        coin: cId,
+      walletValues.push({
+        coin: cObjectIdId,
         balance: amount,
-        address: 'kgjhd ghdfgk jdfshgdfh gdfgh dgh',
-      };
+      });
       newWallet.walletValues = walletValues;
       return newWallet.save();
     } else {
@@ -127,8 +135,7 @@ export class WalletService {
         });
       } else {
         walletValues.push({
-          coin: new Types.ObjectId(coinId),
-          address: 'dkjfh skldjfh askdfj h',
+          coin: cObjectIdId,
           balance: amount,
         });
       }

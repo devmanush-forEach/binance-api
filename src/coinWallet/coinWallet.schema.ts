@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Coin } from 'src/coin/coin.schema';
 import { Network } from 'src/network/network.schema';
+import { User } from 'src/user/user.schema';
 
 export type CoinWalletDocument = CoinWallet & Document;
 
@@ -30,6 +31,15 @@ export class CoinWallet {
 
   @Prop({ type: Boolean, default: false })
   isDeleted: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  isAssigned: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  isGlobal: boolean;
+
+  @Prop({ type: Types.ObjectId, ref: User.name, required: false })
+  user: Types.ObjectId;
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;

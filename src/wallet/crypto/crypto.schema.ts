@@ -14,9 +14,6 @@ export class WalletValue {
 
   @Prop({ required: true, default: 0 })
   balance: number;
-
-  @Prop({ required: true })
-  address: string;
 }
 
 export const WalletValueSchema = SchemaFactory.createForClass(WalletValue);

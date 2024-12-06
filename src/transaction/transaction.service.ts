@@ -19,6 +19,7 @@ import { Wallet, WalletDocument } from 'src/wallet/wallet.schema';
 import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 import { WalletValue } from 'src/wallet/crypto/crypto.schema';
 import { NotificationService } from 'src/notification/notification.service';
+import { CoinWalletService } from 'src/coinWallet/coinWallet.service';
 
 @Injectable()
 export class TransactionService {
@@ -28,6 +29,7 @@ export class TransactionService {
     @InjectModel(Wallet.name) private walletModel: Model<WalletDocument>,
     private readonly notificationsGateway: NotificationsGateway,
     private readonly notificationService: NotificationService,
+    private readonly coinWalletService: CoinWalletService,
   ) {}
 
   async create(createTransactionDto: any): Promise<Transaction> {
@@ -281,6 +283,26 @@ export class TransactionService {
       });
 
       await transaction.save();
+
+      const preExistedCoinWallet =
+        await this.coinWalletService.searchForUserAssigned({
+          coinId,
+          networkId,
+          userId,
+        });
+
+      console.log('preExistedCoinWallet', preExistedCoinWallet);
+      if (!preExistedCoinWallet.length) {
+        const coinWalletDetails =
+          await this.coinWalletService.findOne(coinWallet);
+        if (!coinWalletDetails.isAssigned || coinWalletDetails.isGlobal) {
+          await this.coinWalletService.update(coinWallet, {
+            isAssigned: true,
+            user: userId,
+          });
+        }
+      }
+
       this.notificationsGateway.sendDepositRequestNotification(transaction);
       return transaction;
     } catch (error) {
@@ -291,7 +313,8 @@ export class TransactionService {
 
   async withdraw(userId: string, withdrawalDto: WithdrawalDto) {
     try {
-      const { coinId, networkId, amount, withdrawAddress } = withdrawalDto;
+      const { coinId, networkId, amount, withdrawAddress, coinWallet } =
+        withdrawalDto;
 
       const wallet = await this.walletModel.findOne({ userId });
       if (!wallet) {
@@ -300,14 +323,14 @@ export class TransactionService {
 
       const cId = new Types.ObjectId(coinId);
 
-      const coinWallet = wallet.walletValues.find(
+      const userCoinWallet = wallet.walletValues.find(
         (walletValue) => walletValue.coin == cId,
       );
-      if (!coinWallet) {
+      if (!userCoinWallet) {
         throw new BadRequestException('Coin not found in wallet');
       }
 
-      if (coinWallet.balance < amount) {
+      if (userCoinWallet.balance < amount) {
         throw new BadRequestException('Insufficient balance');
       }
 
@@ -320,9 +343,12 @@ export class TransactionService {
         withdrawAddress,
         status: 'pending',
       });
-      coinWallet.balance -= amount;
+      userCoinWallet.balance -= amount;
 
       await wallet.save();
+      if (coinWallet) {
+        transaction.coinWallet = new Types.ObjectId(coinWallet);
+      }
       await transaction.save();
       this.notificationsGateway.sendWithdrawalRequestNotification(transaction);
 
@@ -361,12 +387,11 @@ export class TransactionService {
           });
           const walletValues = newWallet.walletValues || [];
           const cId = new Types.ObjectId(coinId);
-          const value: WalletValue = {
+          newWallet.walletValues = walletValues;
+          walletValues.push({
             coin: cId,
             balance: transactionAmount,
-            address: uuidv4().replace(/-/g, ''),
-          };
-          newWallet.walletValues = walletValues;
+          });
           newWallet.save();
         } else {
           let walletValues: WalletValue[] = wallet.walletValues;
@@ -387,7 +412,6 @@ export class TransactionService {
           } else {
             walletValues.push({
               coin: coinId,
-              address: uuidv4().replace(/-/g, ''),
               balance: transactionAmount,
             });
           }

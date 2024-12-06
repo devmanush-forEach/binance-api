@@ -22,8 +22,14 @@ export class WalletController {
     @Param('userId') userId: string,
     @Body() crypto: string,
     @Body() amount: number,
+    @Body() coinWallet: string,
   ) {
-    return this.walletService.addCryptoToUserWallet(userId, crypto, amount);
+    return this.walletService.addCryptoToUserWallet(
+      userId,
+      crypto,
+      amount,
+      coinWallet,
+    );
   }
 
   @Post('remove/:userId/:coinId')

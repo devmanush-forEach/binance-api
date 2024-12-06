@@ -7,12 +7,14 @@ import { AuthModule } from 'src/auth/auth.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 import { WalletModule } from 'src/wallet/wallet.module';
 import { NotificationModule } from 'src/notification/notification.module';
+import { CoinWalletModule } from 'src/coinWallet/coinWallet.module';
 
 @Module({
   imports: [
     AuthModule,
     NotificationsModule,
     NotificationModule,
+    CoinWalletModule,
     WalletModule,
     MongooseModule.forFeature([
       { name: Transaction.name, schema: TransactionSchema },

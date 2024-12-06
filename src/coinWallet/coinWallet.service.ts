@@ -32,9 +32,88 @@ export class CoinWalletService {
       .exec();
   }
 
-  async searchByCoinId(coinId: string): Promise<CoinWallet[]> {
+  async searchByCoinId(userId: string, coinId: string): Promise<CoinWallet[]> {
     return this.coinWalletModel
-      .find({ coinId })
+      .aggregate([
+        {
+          $match: {
+            coinId,
+            $or: [{ isAssigned: false }, { isGlobal: true }, { user: userId }],
+          },
+        },
+        {
+          $addFields: {
+            priority: { $cond: [{ $ifNull: ['$userId', false] }, 1, 0] },
+          },
+        },
+        {
+          $sort: {
+            priority: -1,
+            _id: 1,
+          },
+        },
+        {
+          $group: {
+            _id: {
+              networkId: '$networkId',
+            },
+            document: { $first: '$$ROOT' },
+          },
+        },
+        {
+          $replaceRoot: {
+            newRoot: '$document',
+          },
+        },
+        {
+          $addFields: {
+            coinId: { $toObjectId: '$coinId' },
+            networkId: { $toObjectId: '$networkId' },
+          },
+        },
+        {
+          $lookup: {
+            from: 'coins',
+            localField: 'coinId',
+            foreignField: '_id',
+            as: 'coinId',
+          },
+        },
+        {
+          $lookup: {
+            from: 'networks',
+            localField: 'networkId',
+            foreignField: '_id',
+            as: 'networkId',
+          },
+        },
+        {
+          $unwind: {
+            path: '$coinId',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $unwind: {
+            path: '$networkId',
+            preserveNullAndEmptyArrays: true, // Optional, keep documents even if no match
+          },
+        },
+      ])
+      .exec();
+  }
+
+  async searchForUserAssigned({
+    coinId,
+    userId,
+    networkId,
+  }: {
+    coinId: string;
+    networkId: string;
+    userId: string;
+  }): Promise<CoinWallet[]> {
+    return this.coinWalletModel
+      .find({ coinId, networkId, user: userId, isActive: true })
       .populate('coinId')
       .populate('networkId')
       .exec();

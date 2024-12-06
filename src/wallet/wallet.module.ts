@@ -6,10 +6,12 @@ import { Coin, CoinSchema } from 'src/coin/coin.schema';
 import { Wallet, WalletSchema } from './wallet.schema';
 import { AuthModule } from 'src/auth/auth.module';
 import { CoinModule } from 'src/coin/coin.module';
+import { CoinWalletModule } from 'src/coinWallet/coinWallet.module';
 
 @Module({
   imports: [
     CoinModule,
+    CoinWalletModule,
     forwardRef(() => AuthModule),
     MongooseModule.forFeature([{ name: Wallet.name, schema: WalletSchema }]),
     MongooseModule.forFeature([{ name: Coin.name, schema: CoinSchema }]),
